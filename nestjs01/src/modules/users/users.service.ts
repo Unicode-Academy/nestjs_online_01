@@ -1,12 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
+import DatabaseService from 'src/db/database.service';
+import * as db from 'src/db/data.json';
 
-@Injectable()
+@Injectable({ scope: Scope.DEFAULT })
 export class UsersService {
+  constructor(private readonly dbService: DatabaseService) {
+    console.log('user service created');
+  }
   findAll() {
-    return 'ahihi';
+    return this.dbService.query();
   }
   findOne(id: string) {
-    return 'detail - ' + id;
+    return db.find((user) => user.id === +id);
   }
   filters(query: any) {
     return query;
