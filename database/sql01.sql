@@ -26,7 +26,7 @@
 -- DESCRIBE users;
 
 -- USE hocdb;
--- INSERT INTO users(`name`, `email`, `password`, created_at, updated_at) 
+-- INSERT INTO users(`name`, `emadbdiagramil`, `password`, created_at, updated_at) 
 -- VALUES('User 2', 'user2@gmail.com', '123456', NOW(), NOW());
 -- 
 -- INSERT INTO users(`name`, `email`, `password`, created_at, updated_at) 
@@ -38,7 +38,7 @@
 
 INSERT INTO users(`name`, `email`, `password`, created_at, updated_at)
 VALUES ('User 5', 'user5@gmail.com', '123457', NOW(), NOW()), 
-('User 6', 'user6@gmail.com', '123457', NOW(), NOW()), 
+('User 6', 'user6@gmaildbdiagram.com', '123457', NOW(), NOW()), 
 ('User 7', 'user7@gmail.com', '123457', NOW(), NOW())
 
 

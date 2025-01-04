@@ -8,4 +8,10 @@
 
 -- DELETE FROM users WHERE id <= 5;
 
-SELECT * FROM customers ORDER BY `name` ASC, id DESC
+-- SELECT * FROM customers ORDER BY `name` ASC, id DESC
+
+-- LIMIT
+
+-- PHÂN TRANG: offset = (page - 1) * limit 
+
+SELECT * FROM customers ORDER BY id DESC LIMIT 3 OFFSET 6;

@@ -222,3 +222,46 @@ DELETE FROM tenbang WHERE dieukien
 ```
 SELECT *|tencot1,tencot2,... FROM tenbang WHERE dieukien
 ```
+
+### Relationship
+
+Từ 2 bảng trở lên
+
+1. One to One (1-1)
+
+- 1 bản ghi của bảng này chỉ liên kết tới 1 bản ghi của bảng khác
+- Xác định trường sẽ liên kết (Đánh khóa ngoại)
+- Ví dụ:
+
+* 1 chồng CHỈ có 1 vợ
+* 1 vợ chỉ thuộc về 1 chồng
+
+2. One to Many (1-n)
+
+- 1 bản ghi của bảng này sẽ liên kết tới 1 hoặc nhiều bản ghi của bảng khác
+- Xác định trường sẽ liên kết (Đánh khóa ngoại)
+- Ví dụ:
+
+* 1 công dân có thể có nhiều sổ đỏ
+* 1 sổ đỏ chỉ thuộc về 1 công dân
+
+3. Many to Many (n-n)
+
+- 1 bản ghi cảu bảng này sẽ liên kết tới 1 hoặc nhiều bản ghi của bảng khác và ngược lại
+- Cần phải có bảng trung gian
+- Trường liên kết nằm ở bảng trung gian
+- Ví dụ:
+
+* 1 tác giả có thể có nhiều cuốn sách
+* 1 cuốn sách có thể thuộc nhiều tác giả
+
+Bài toán gặp vấn đề query n + 1
+
+- Hiển thị danh sách users và số điện thoại từng user
+
+- Giải pháp 1: ==> Bị query n + 1
+
+* Viết truy vấn lấy danh sách users: `SELECT * FROM users`
+* Dùng lập trình lặp qua từng phần tử của user sau đó lấy được id của từng user và thực hiện truy vấn bên trong vòng lặp: `SELECT phone FROM phones WHERE user_id = ${userId}`
+
+- Giải pháp 2: Join bảng, subquery, where in ở tầng database
