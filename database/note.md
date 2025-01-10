@@ -265,3 +265,105 @@ Bài toán gặp vấn đề query n + 1
 * Dùng lập trình lặp qua từng phần tử của user sau đó lấy được id của từng user và thực hiện truy vấn bên trong vòng lặp: `SELECT phone FROM phones WHERE user_id = ${userId}`
 
 - Giải pháp 2: Join bảng, subquery, where in ở tầng database
+
+## Ví dụ transaction
+
+Cần xây dựng tính năng rút tiền cây ATM
+
+1. Xác thực mã PIN
+
+- Lấy mã PIN từ người dùng
+- Kiểm tra với bảng users
+- Đúng chuyển bước 2
+
+2. Nhập số tiền cần rút
+
+- Nhận số tiền từ input
+- Kiểm tra số dư trong tài khoản
+- Nếu số tiền cần rút <= số dư trong tài khoản -> Chuyển bước 3
+
+3. Trừ tiền trong tài khoản
+
+- Update bảng users tương ứng với số tiền rút
+
+4. Trả tiền
+
+- Nhả tiền ra cây ATM
+
+SELECT \* FROM users WHERE name = 'An'
+
+## Đánh index
+
+- Tăng tốc truy vấn, áp dụng với các bảng có dữ liệu lớn
+- Giảm tốc độ thêm, sửa, xóa --> Lập chỉ mục khi có sự thay đổi dữ liệu
+
+1. Đánh index ở các cột thường xuyên dùng điều kiện truy vấn
+
+- WHERE
+- JOIN
+- ORDER BY
+- GROUP BY
+- HAVING
+
+2. Xác định index
+
+- PRIMARY KEY
+- Unique
+- KEY
+- Composite Index: Gộp index (Tạo 1 index cho nhiều cột)
+  Lưu ý: Khi các cột đã có sẵn index: primary key hoặc unique --> Không cần phải đánh lại index (Ngoại trừ phát sinh truy vấn gộp)
+  `SELECT * FROM users WHERE email='aihihi@gmail.com'`
+
+3. Đánh index cho các cột có độ chọn lọc cao
+
+- Dữ liệu giữa các bản ghi khác nhau nhiều
+- Không nên đánh index ở các cột có ít giá trị khác nhau (status, thời gian không bắt buộc)
+
+4. Tránh đánh index các cột thường xuyên thay đổi
+
+- Giảm hiệu suất ghi dữ liệu
+- Ví dụ: last_login, updated_at, status,...
+
+5. Sử dụng index phù hợp với loại truy vấn
+
+- Fulltext index: Dùng cho các trường hợp tìm kiếm văn bản dài
+- B-Tree index: Phù hợp với các điều kiện lọc so sánh: =, >, <, BETWEEN, LIKE 'abc%', LIKE '%abc'
+- Hash Index: Thường sử dụng với phép so sánh bằng (=)
+
+6. Hạn chế số lượng index trên 1 Bảng
+
+- Chậm thêm sửa Xóa
+- Chỉ giữ lại các index cần thiết
+
+7. Đánh index trên các khóa ngoại
+
+- Các cột liên kết khóa ngoại --> Đánh index --> Tăng tốc truy vấn cho mệnh đề JOIN
+
+8. Kiểm tra lại kết quả của việc đánh index
+
+- EXPLAIN
+- Query Optimizer
+
+9. Nếu Database hỗ trợ Partial Index nên sử dụng
+
+- Chỉ index khi thỏa mãn điều kiện nào
+
+### Một số trường hợp cần tránh
+
+1. Cột có ít giá trị khác nhau
+
+2. Cột thường xuyên cập nhật
+
+3. Cột có kích thước lớn (Cân nhắc dùng fulltext hoặc không dùng index)
+
+4. Cột được dùng cho phép tính hoặc hàm
+
+Ví dụ: `SELECT * FROM orders WHERE YEAR(created_at) = 2025`
+
+Lý do: Index hoạt động dựa trên dữ liệu gốc của bảng -> Nếu dùng qua hàm, phép tính -> Quét toàn bộ bảng
+
+5. Cột của bảng nhỏ
+
+6. Khi có quá nhiều index trong 1 bảng
+
+=> Nên tìm hiểu về việc import và export bằng command line
