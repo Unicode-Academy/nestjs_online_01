@@ -1,7 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import {
+  Between,
+  Equal,
+  ILike,
+  In,
+  IsNull,
+  LessThan,
+  LessThanOrEqual,
+  Like,
+  MoreThan,
+  MoreThanOrEqual,
+  Not,
+  Or,
+  Raw,
+  Repository,
+} from 'typeorm';
 import { User } from './entites/user.entity';
+import { hashPassword } from 'src/utils/hashing';
 
 @Injectable()
 export class UsersService {
@@ -10,22 +26,33 @@ export class UsersService {
   ) {}
   findAll() {
     return this.usersRepository.find({
-      select: {
-        // id: true,
-        // name: true,
-        // email: true,
-      },
       order: {
         id: 'DESC',
       },
+      // where: [
+      //   {
+      //     id: 7,
+      //     email: 'user1@gmail.com',
+      //   },
+      //   {
+      //     status: true,
+      //     name: 'Hoàng An',
+      //   },
+      // ],
+      where: {
+        // email: Not('hoangan.web@gmail.com'),
+        // id: Equal(7),
+        // email: ILike('%hoangan%'),
+        // bio: Not(IsNull()),
+        // id: Raw('MAX(id)'),
+        email: Or(Like('%user1%'), Like('%hoangan%')),
+      },
+      // take: 2,
+      // skip: 2,
     });
   }
+  //Giả sử: WHERE name LIKE '%hoangan%' OR email LIKE '%hoangan%'
   findOne(id: number) {
-    // return this.usersRepository.findOne({
-    //   where: {
-    //     id,
-    //   },
-    // });
     return this.usersRepository.findOneOrFail({
       where: { id },
     });
@@ -33,6 +60,7 @@ export class UsersService {
 
   create(user: Partial<User>) {
     const newUser = this.usersRepository.create(user);
+    newUser.password = hashPassword(newUser.password);
     return this.usersRepository.save(newUser);
   }
 

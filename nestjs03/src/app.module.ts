@@ -20,6 +20,7 @@ import { Post } from './modules/users/entites/post.entity';
       entities: [User, Post],
       synchronize:
         process.env.NODE_ENV === 'development' || !process.env.NODE_ENV, //Tự động đồng bộ với database khi có sự thay đổi từ entity (Chỉ nên để ở môi trường dev)
+      logging: process.env.NODE_ENV === 'development' || !process.env.NODE_ENV,
     }),
     UsersModule,
   ],
