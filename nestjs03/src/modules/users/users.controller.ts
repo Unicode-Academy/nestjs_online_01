@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -7,16 +8,33 @@ import {
   Param,
   Patch,
   Post,
+  Query,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './entites/user.entity';
-
+import { Phone } from './entites/phone.entity';
+export type QueryFindAll = {
+  _sort: string;
+  _order: string;
+  q: string;
+  _limit: number;
+  _page: number;
+};
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  async findAll(
+    @Query()
+    query: QueryFindAll,
+  ) {
+    const [users, count] = await this.usersService.findAll(query);
+    return {
+      data: users,
+      count,
+      currentPage: query._page ? +query._page : 1,
+    };
   }
   @Get(':id')
   async findOne(@Param('id') id: number) {
@@ -28,8 +46,8 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
   @Post()
-  create(@Body() user: Partial<User>) {
-    return this.usersService.create(user);
+  create(@Body() body: Partial<User & { phone: string }>) {
+    return this.usersService.create(body);
   }
 
   @Patch(':id')
@@ -39,5 +57,22 @@ export class UsersController {
   @Delete(':id')
   delete(@Param('id') id: number) {
     return this.usersService.delete(id);
+  }
+
+  @Delete()
+  async deleteMany(@Body() body: number[]) {
+    if (!body || !body?.length) {
+      throw new BadRequestException('Vui lòng cung cấp id cần xóa');
+    }
+    const count = await this.usersService.deleteMany(body);
+    if (!count) {
+      return {
+        success: false,
+      };
+    }
+    return {
+      success: true,
+      deleteCount: count,
+    };
   }
 }

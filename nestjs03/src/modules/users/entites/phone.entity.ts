@@ -5,43 +5,20 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
-import { Phone } from './phone.entity';
+import { User } from './user.entity';
 
-@Entity('users')
+@Entity('phones')
 //PascalCase
-export class User {
+export class Phone {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({
-    length: 50,
-  })
-  name: string;
+  @Column({ length: 15 })
+  phone: string;
 
-  @Column({
-    length: 100,
-    unique: true,
-  })
-  email: string;
-
-  @Column({
-    length: 100,
-  })
-  password: string;
-
-  @Column({
-    default: true,
-  })
-  status: boolean;
-
-  @Column({
-    type: 'text',
-    nullable: true,
-  })
-  bio: string;
-
-  @OneToOne(() => Phone, (phone) => phone.user)
-  phone: Phone;
+  @OneToOne(() => User, (user) => user.phone)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
   @Column({
     type: 'timestamp',

@@ -18,16 +18,38 @@ import {
 } from 'typeorm';
 import { User } from './entites/user.entity';
 import { hashPassword } from 'src/utils/hashing';
+import { QueryFindAll } from './users.controller';
+import { PhonesService } from '../phones/phones.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
+    private readonly phoneService: PhonesService,
   ) {}
-  findAll() {
-    return this.usersRepository.find({
+  findAll(query: QueryFindAll) {
+    const { _order, _sort, _limit = 10, _page = 1, q } = query;
+    const skip = (_page - 1) * _limit;
+    const where = [];
+    if (q) {
+      where.push(
+        {
+          name: Like(`%${q}%`),
+        },
+        {
+          email: Like(`%${q}%`),
+        },
+      );
+    }
+    return this.usersRepository.findAndCount({
       order: {
-        id: 'DESC',
+        [_sort]: _order,
+      },
+      take: _limit,
+      skip,
+      where,
+      relations: {
+        phone: true,
       },
       // where: [
       //   {
@@ -39,29 +61,43 @@ export class UsersService {
       //     name: 'Hoàng An',
       //   },
       // ],
-      where: {
-        // email: Not('hoangan.web@gmail.com'),
-        // id: Equal(7),
-        // email: ILike('%hoangan%'),
-        // bio: Not(IsNull()),
-        // id: Raw('MAX(id)'),
-        email: Or(Like('%user1%'), Like('%hoangan%')),
-      },
+      // where: {
+      //   // email: Not('hoangan.web@gmail.com'),
+      //   // id: Equal(7),
+      //   // email: ILike('%hoangan%'),
+      //   // bio: Not(IsNull()),
+      //   // id: Raw('MAX(id)'),
+      //   email: Or(Like('%user1%'), Like('%hoangan%')),
+      // },
       // take: 2,
       // skip: 2,
+      // where: [
+      //   {
+      //     name: Like('%hoangan%'),
+      //   },
+      //   {
+      //     email: Like('%hoangan%'),
+      //   },
+      // ],
     });
   }
-  //Giả sử: WHERE name LIKE '%hoangan%' OR email LIKE '%hoangan%'
+  //Giả sử: WHERE (name LIKE '%hoangan%' OR email LIKE '%hoangan%') AND status = true
   findOne(id: number) {
     return this.usersRepository.findOneOrFail({
       where: { id },
+      relations: {
+        phone: true,
+      },
     });
   }
 
-  create(user: Partial<User>) {
-    const newUser = this.usersRepository.create(user);
+  async create(body: Partial<User & { phone: string }>) {
+    const { phone, ...userData } = body;
+    const newUser = this.usersRepository.create(userData);
     newUser.password = hashPassword(newUser.password);
-    return this.usersRepository.save(newUser);
+    const user = await this.usersRepository.save(newUser);
+    const data = await this.phoneService.create({ phone }, user);
+    console.log(data);
   }
 
   async update(id: number, user: Partial<User>) {
@@ -74,4 +110,28 @@ export class UsersService {
     await this.usersRepository.delete(id);
     return user;
   }
+  async deleteMany(ids: number[]) {
+    const data = await this.usersRepository.delete({
+      id: In(ids),
+    });
+    return data.affected;
+  }
 }
+
+//Bài tập: Viết API sau
+
+//DELETE /users
+//Body: [1,2,3]
+//Chức năng: Xóa nhiều users theo id gửi lên
+
+//Xây dựng api sau
+
+//GET /users
+// 1. Sort
+// _sort=name&_order=desc
+
+// 2. Filter
+// q=abc
+
+//3. Paginate (Phải trả về thêm thông tin tất cả bản ghi)
+// _limit=2&_page=1
