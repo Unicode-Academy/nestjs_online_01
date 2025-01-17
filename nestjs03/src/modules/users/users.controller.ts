@@ -20,6 +20,7 @@ export type QueryFindAll = {
   q: string;
   _limit: number;
   _page: number;
+  include: string;
 };
 @Controller('users')
 export class UsersController {
@@ -37,13 +38,16 @@ export class UsersController {
     };
   }
   @Get(':id')
-  async findOne(@Param('id') id: number) {
+  async findOne(
+    @Param('id') id: number,
+    @Query() query: { include: string; [key: string]: string },
+  ) {
     // const user = await this.usersService.findOne(id);
     // if (!user) {
     //   throw new NotFoundException('User not found');
     // }
     // return user;
-    return this.usersService.findOne(id);
+    return this.usersService.findOne(id, query);
   }
   @Post()
   create(@Body() body: Partial<User & { phone: string }>) {

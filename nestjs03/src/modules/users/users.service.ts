@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   Between,
   Equal,
+  getConnection,
   ILike,
   In,
   IsNull,
@@ -20,15 +21,21 @@ import { User } from './entites/user.entity';
 import { hashPassword } from 'src/utils/hashing';
 import { QueryFindAll } from './users.controller';
 import { PhonesService } from '../phones/phones.service';
+import { PostsService } from '../posts/posts.service';
 
 @Injectable()
 export class UsersService {
+  private filters = {
+    posts: 'title',
+    phone: 'phone',
+  };
   constructor(
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
     private readonly phoneService: PhonesService,
+    private readonly postsService: PostsService,
   ) {}
   findAll(query: QueryFindAll) {
-    const { _order, _sort, _limit = 10, _page = 1, q } = query;
+    const { _order, _sort, _limit = 10, _page = 1, q, include } = query;
     const skip = (_page - 1) * _limit;
     const where = [];
     if (q) {
@@ -41,6 +48,11 @@ export class UsersService {
         },
       );
     }
+    let relations = [];
+    if (include) {
+      relations = include.split(',');
+    }
+
     return this.usersRepository.findAndCount({
       order: {
         [_sort]: _order,
@@ -48,9 +60,7 @@ export class UsersService {
       take: _limit,
       skip,
       where,
-      relations: {
-        phone: true,
-      },
+      relations,
       // where: [
       //   {
       //     id: 7,
@@ -82,12 +92,25 @@ export class UsersService {
     });
   }
   //Giả sử: WHERE (name LIKE '%hoangan%' OR email LIKE '%hoangan%') AND status = true
-  findOne(id: number) {
-    return this.usersRepository.findOneOrFail({
-      where: { id },
-      relations: {
-        phone: true,
+  findOne(id: number, query: { include: string; [key: string]: string }) {
+    const { include, ...rest } = query;
+    let relations = [];
+    if (include) {
+      relations = include.split(',');
+    }
+    const filterRelations = {};
+    Object.keys(rest).forEach((key) => {
+      const relationName = key.replace('_query', '');
+      filterRelations[relationName] = {
+        [this.filters[relationName]]: Like(`%${rest[key]}%`),
+      };
+    });
+    return this.usersRepository.findOne({
+      where: {
+        id,
+        ...filterRelations,
       },
+      relations,
     });
   }
 
@@ -102,11 +125,20 @@ export class UsersService {
 
   async update(id: number, user: Partial<User>) {
     await this.usersRepository.update(id, user);
-    return this.findOne(id);
+    return this.usersRepository.findOne({
+      where: { id },
+    });
   }
 
   async delete(id: number) {
-    const user = await this.findOne(id);
+    const user = await this.usersRepository.findOne({
+      where: { id },
+    });
+    //Xóa phone trước
+    await this.phoneService.removeByUser(id);
+    //Xóa tất cả posts
+    await this.postsService.removeByUser(id);
+    //Xóa user theo id
     await this.usersRepository.delete(id);
     return user;
   }

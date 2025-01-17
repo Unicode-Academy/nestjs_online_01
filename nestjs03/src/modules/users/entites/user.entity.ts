@@ -4,8 +4,10 @@ import {
   Column,
   OneToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Phone } from './phone.entity';
+import { Post } from './post.entity';
 
 @Entity('users')
 //PascalCase
@@ -42,6 +44,9 @@ export class User {
 
   @OneToOne(() => Phone, (phone) => phone.user)
   phone: Phone;
+
+  @OneToMany(() => Post, (post) => post.user)
+  posts: Post[];
 
   @Column({
     type: 'timestamp',

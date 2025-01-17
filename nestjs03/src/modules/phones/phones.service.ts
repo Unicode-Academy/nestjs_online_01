@@ -17,4 +17,12 @@ export class PhonesService {
     const newPhone = this.phoneRepository.create(phone);
     return this.phoneRepository.save(newPhone);
   }
+
+  removeByUser(userId: number) {
+    return this.phoneRepository.delete({
+      user: {
+        id: userId,
+      },
+    });
+  }
 }
