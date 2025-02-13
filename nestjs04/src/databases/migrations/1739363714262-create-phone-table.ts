@@ -1,10 +1,15 @@
-import { MigrationInterface, QueryRunner, Table } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableForeignKey,
+} from 'typeorm';
 
-export class CreateUserTable1739196760456 implements MigrationInterface {
+export class CreatePhoneTable1739363714262 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'users',
+        name: 'phones',
         columns: [
           {
             name: 'id',
@@ -14,26 +19,13 @@ export class CreateUserTable1739196760456 implements MigrationInterface {
             generationStrategy: 'increment',
           },
           {
-            name: 'name',
-            type: 'varchar(50)',
+            name: 'phone',
+            type: 'varchar(15)',
           },
           {
-            name: 'email',
-            type: 'varchar(100)',
-          },
-          {
-            name: 'password',
-            type: 'varchar(100)',
+            name: 'user_id',
+            type: 'int',
             isNullable: true,
-          },
-          {
-            name: 'status',
-            type: 'boolean',
-            default: true,
-          },
-          {
-            name: 'verify_at',
-            type: 'timestamp',
           },
           {
             name: 'created_at',
@@ -49,12 +41,19 @@ export class CreateUserTable1739196760456 implements MigrationInterface {
       }),
     );
 
-    await queryRunner.query(
-      `CREATE UNIQUE INDEX users_email_unique ON users(email)`,
+    await queryRunner.createForeignKey(
+      'phones',
+      new TableForeignKey({
+        columnNames: ['user_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'users',
+        onDelete: 'CASCADE',
+        name: 'phones_user_id_foreign',
+      }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('users', true);
+    await queryRunner.dropTable('phones', true);
   }
 }

@@ -31,6 +31,8 @@ export class UsersController {
     query: QueryFindAll,
   ) {
     const [users, count] = await this.usersService.findAll(query);
+    console.log('users', users);
+
     return {
       data: users,
       count,

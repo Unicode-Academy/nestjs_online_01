@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class CreateUserTable1739196760456 implements MigrationInterface {
+export class CreateCoursesTable1739364662599 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'users',
+        name: 'courses',
         columns: [
           {
             name: 'id',
@@ -15,26 +15,13 @@ export class CreateUserTable1739196760456 implements MigrationInterface {
           },
           {
             name: 'name',
-            type: 'varchar(50)',
+            type: 'varchar(255)',
           },
           {
-            name: 'email',
-            type: 'varchar(100)',
+            name: 'price',
+            type: 'double(20,2)',
           },
-          {
-            name: 'password',
-            type: 'varchar(100)',
-            isNullable: true,
-          },
-          {
-            name: 'status',
-            type: 'boolean',
-            default: true,
-          },
-          {
-            name: 'verify_at',
-            type: 'timestamp',
-          },
+
           {
             name: 'created_at',
             type: 'timestamp',
@@ -48,13 +35,9 @@ export class CreateUserTable1739196760456 implements MigrationInterface {
         ],
       }),
     );
-
-    await queryRunner.query(
-      `CREATE UNIQUE INDEX users_email_unique ON users(email)`,
-    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('users', true);
+    await queryRunner.dropTable('courses');
   }
 }
