@@ -24,12 +24,16 @@
     "migration:rollback": "npm run typeorm -- -d ./src/config/typeorm.ts migration:revert",
     "migration:generate": "npm run typeorm -- -d ./src/config/typeorm.ts migration:generate ./src/databases/migrations/%npm_config_name%",
     "migration:reset": "npm run typeorm schema:drop -- -d ./src/config/typeorm",
-    "migration:refresh": "npm run migration:reset && npm run migration:run"
+    "migration:refresh": "npm run migration:reset && npm run migration:run",
+    "seed:config": "ts-node -r tsconfig-paths/register ./node_modules/typeorm-seeding/dist/cli.js config",
+    "seed:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm-seeding/dist/cli.js seed"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.5.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.3.0",
     "@nestjs/core": "^10.0.0",
+    "@nestjs/jwt": "^11.0.0",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/typeorm": "^10.0.2",
@@ -38,13 +42,15 @@
     "mysql2": "^3.12.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
-    "typeorm": "^0.3.20"
+    "typeorm": "^0.3.20",
+    "typeorm-seeding": "^1.6.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
     "@types/express": "^5.0.0",
+    "@types/faker": "^6.6.8",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.3.1",
     "@types/supertest": "^6.0.0",
