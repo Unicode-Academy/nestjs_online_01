@@ -14,7 +14,11 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token =
       request.get('authorization')?.split(' ').slice(-1).join() ?? '';
-    const user = await this.authService.getUser(token);
+    const userAgent = request.get('user-agent');
+    if (!userAgent) {
+      throw new UnauthorizedException('User agent is required');
+    }
+    const user = await this.authService.getUser(token, userAgent);
     if (!user) {
       throw new UnauthorizedException('Invalid token');
     }

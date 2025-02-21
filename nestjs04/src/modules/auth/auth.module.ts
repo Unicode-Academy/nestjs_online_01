@@ -6,9 +6,10 @@ import { User } from 'src/entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { RedisModule } from '@nestjs-modules/ioredis';
+import { SocialLoginController } from './social.controller';
 
 @Module({
-  controllers: [AuthController],
+  controllers: [AuthController, SocialLoginController],
   providers: [AuthService],
   imports: [
     ConfigModule.forRoot(),

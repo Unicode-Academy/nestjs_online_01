@@ -7,24 +7,28 @@ import {
   Headers,
   Post,
   Req,
-  Request,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { he } from '@faker-js/faker/.';
 import { AuthGuard } from 'src/guards/auth/auth.guard';
+import { Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() { email, password }) {
+  async login(@Body() { email, password }, @Req() request: Request) {
     if (!email || !password) {
       throw new BadRequestException('Email and password are required');
     }
-    const user = await this.authService.checkAuth(email, password);
+    const userAgent = request.get('user-agent');
+    if (!userAgent) {
+      throw new BadRequestException('User agent is required');
+    }
+    const user = await this.authService.checkAuth(email, password, userAgent);
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }

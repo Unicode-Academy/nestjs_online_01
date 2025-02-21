@@ -10,13 +10,15 @@ import Redis from 'ioredis';
 
 @Injectable()
 export class AuthService {
+  private userAgent: string = null;
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private jwtService: JwtService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
-  async checkAuth(email: string, password: string) {
+  async checkAuth(email: string, password: string, userAgent: string) {
+    this.userAgent = md5(userAgent);
     //Kiểm tra email có tồn tại hay không?
     const user = await this.userRepository.findOne({
       where: { email },
@@ -80,16 +82,21 @@ export class AuthService {
     };
   }
 
-  async getUser(token: string) {
+  async getUser(token: string, userAgent: string) {
     const payload = this.decodeToken(token);
-    if (!payload) return false;
+    if (!payload || md5(userAgent) !== payload.userAgent) return false;
+
     const tokenFromRedis = await this.redis.get(`blacklist_${md5(token)}`);
     if (tokenFromRedis) return false;
     return this.userRepository.findOne({ where: { id: payload.sub } });
   }
 
   createToken(user: User) {
-    const payload = { sub: user.id, email: user.email };
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      userAgent: this.userAgent,
+    };
     return this.jwtService.signAsync(payload);
   }
 
@@ -137,5 +144,42 @@ export class AuthService {
 
   decodeToken(token: string) {
     return this.jwtService.decode(token);
+  }
+
+  async getGoogleUser(accessToken: string) {
+    try {
+      const response = await fetch(
+        `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${accessToken}`,
+        {
+          method: 'GET',
+        },
+      );
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+      return response.json();
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async loginGoogle(
+    googleUser: { name: string; email: string },
+    userAgent: string,
+  ) {
+    this.userAgent = md5(userAgent);
+    let user = await this.userRepository.findOne({
+      where: { email: googleUser.email },
+    });
+    if (!user) {
+      const userData = this.userRepository.create({
+        fullname: googleUser.name,
+        email: googleUser.email,
+        status: true,
+        verify_at: new Date(),
+      });
+      user = await this.userRepository.save(userData);
+    }
+    return this.getToken(user);
   }
 }
