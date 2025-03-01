@@ -7,10 +7,14 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { SocialLoginController } from './social.controller';
+import { SettingsModule } from '../settings/settings.module';
+import WelcomeEmail from 'src/mail/Welcome';
+import { BullModule } from '@nestjs/bullmq';
+import { QUEUE_NAME } from 'src/constants/queue';
 
 @Module({
   controllers: [AuthController, SocialLoginController],
-  providers: [AuthService],
+  providers: [AuthService, WelcomeEmail],
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forFeature([User]),
@@ -22,6 +26,10 @@ import { SocialLoginController } from './social.controller';
     RedisModule.forRoot({
       type: 'single',
       url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+    }),
+    SettingsModule,
+    BullModule.registerQueue({
+      name: QUEUE_NAME.EMAIL,
     }),
   ],
   exports: [AuthService],

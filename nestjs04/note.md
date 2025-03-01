@@ -43,3 +43,13 @@ Bổ sung query: ?include=posts,phone
     ]
 }
 ```
+
+## Email
+
+1. Tác dụng
+
+- Thông báo: Đăng ký tài khoản, đặt hàng, quên mật khẩu, xác thực,...
+- Marketing: Khuyến mãi, sản phẩm mới,...
+- Autoresponder: Lập lịch gửi
+
+ClientA --> POP3/IMAP --> ServerMail A ---> SMTP --> ServerMail B --> POP3/IMAP --> ClientB

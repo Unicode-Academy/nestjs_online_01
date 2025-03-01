@@ -74,4 +74,9 @@ export class AuthController {
       message: 'Logout successfully',
     };
   }
+
+  @Post('register')
+  async register() {
+    return this.authService.register();
+  }
 }
