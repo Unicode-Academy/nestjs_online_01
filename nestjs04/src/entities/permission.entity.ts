@@ -6,47 +6,31 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
-import { Phone } from './phone.entity';
 import { Role } from './role.entity';
 
-@Entity('users')
+@Entity('permissions')
 //PascalCase
-export class User {
+export class Permission {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  fullname: string;
-
-  @Column()
-  email: string;
-
-  @Column()
-  password: string;
+  name: string;
 
   @Column()
   status: boolean;
 
-  @OneToOne(() => Phone, (phone) => phone.user)
-  phone: Phone;
-
   @ManyToMany(() => Role)
   @JoinTable({
-    name: 'users_roles',
+    name: 'roles_permissions',
     joinColumn: {
-      name: 'user_id',
+      name: 'permission_id',
     },
     inverseJoinColumn: {
       name: 'role_id',
     },
   })
   roles: Role[];
-
-  @Column({
-    type: 'timestamp',
-    nullable: true,
-  })
-  verify_at: Date;
 
   @Column({
     type: 'timestamp',

@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
+import { RolesService } from '../roles/roles.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly roleService: RolesService,
   ) {}
   findAll() {
     // return this.usersRepository.find();
@@ -29,5 +31,32 @@ export class UsersService {
 
   create(userData: any) {
     return this.usersRepository.save(userData);
+  }
+
+  async assignRoles(user: User, roles: number[]) {
+    const roleList = await Promise.all(
+      roles.map((roleId: number) => this.roleService.find(roleId)),
+    );
+    if (roleList) {
+      user.roles = roleList;
+      this.usersRepository.save(user);
+    }
+    return user;
+  }
+
+  async find(userId: number) {
+    return this.usersRepository.findOne({ where: { id: userId } });
+  }
+
+  async roles(userId: number) {
+    const user = this.usersRepository.findOne({
+      where: { id: userId },
+      relations: {
+        roles: {
+          permissions: true,
+        },
+      },
+    });
+    return user;
   }
 }

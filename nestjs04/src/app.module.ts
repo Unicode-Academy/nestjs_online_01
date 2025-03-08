@@ -17,6 +17,7 @@ import { SettingsModule } from './modules/settings/settings.module';
 import * as path from 'path';
 import { BullModule } from '@nestjs/bullmq';
 import { EmailConsumer } from './consumer/EmailConsumer';
+import { RolesModule } from './modules/roles/roles.module';
 import WelcomeEmail from './mail/Welcome';
 import mail from './config/mail';
 
@@ -48,6 +49,7 @@ import mail from './config/mail';
     UsersModule,
     AuthModule,
     SettingsModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService, EmailConsumer, WelcomeEmail],
