@@ -13,7 +13,11 @@ export class RolesService {
     private readonly permissionRepository: Repository<Permission>,
   ) {}
   findAll() {
-    return this.roleRepository.find();
+    return this.roleRepository.find({
+      where: {
+        is_root: false,
+      },
+    });
   }
   find(id: number, isPermission = false) {
     const options: FindOneOptions = { where: { id } };

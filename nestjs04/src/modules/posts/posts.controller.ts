@@ -28,6 +28,11 @@ export class PostsController {
   }
   @Patch(':id')
   update(@Param('id') id: number, @Body() body: any) {
+    //Check quyền xem có quyền update bản ghi tương ứng với id không?
+    // const post = this.postsService.find(id);
+    // if (post.user_id !== loginUserId) {
+
+    // }
     return this.postsService.update(id, body);
   }
 

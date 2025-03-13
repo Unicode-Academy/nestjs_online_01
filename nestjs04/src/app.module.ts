@@ -20,6 +20,10 @@ import { EmailConsumer } from './consumer/EmailConsumer';
 import { RolesModule } from './modules/roles/roles.module';
 import WelcomeEmail from './mail/Welcome';
 import mail from './config/mail';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { OrderModule } from './modules/order/order.module';
+import { CommissionModule } from './modules/commission/commission.module';
+import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
   imports: [
@@ -43,6 +47,7 @@ import mail from './config/mail';
         port: +process.env.REDIS_PORT,
       },
     }),
+    EventEmitterModule.forRoot(),
 
     PostsModule,
     CategoriesModule,
@@ -50,6 +55,9 @@ import mail from './config/mail';
     AuthModule,
     SettingsModule,
     RolesModule,
+    OrderModule,
+    CommissionModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService, EmailConsumer, WelcomeEmail],

@@ -20,6 +20,9 @@ export class Role {
   @Column()
   status: boolean;
 
+  @Column()
+  is_root: boolean;
+
   @ManyToMany(() => User)
   @JoinTable({
     name: 'users_roles',
@@ -32,7 +35,9 @@ export class Role {
   })
   users: User[];
 
-  @ManyToMany(() => Permission)
+  @ManyToMany(() => Permission, {
+    eager: true,
+  })
   @JoinTable({
     name: 'roles_permissions',
     joinColumn: {

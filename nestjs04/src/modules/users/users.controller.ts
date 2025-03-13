@@ -6,23 +6,34 @@ import {
   NotAcceptableException,
   NotFoundException,
   Param,
+  Post,
   Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthGuard } from 'src/guards/auth/auth.guard';
+import { PermissionGuard } from 'src/guards/permission/permission.guard';
+import { getPermissions } from 'src/utils/utils';
 
 @Controller('users')
+@UseGuards(AuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   @Get()
+  @UseGuards(PermissionGuard('users.read'))
   findAll() {
     return this.usersService.findAll();
   }
 
+  @Post()
+  @UseGuards(PermissionGuard('users.create'))
+  create(@Body() body: any) {
+    return body;
+  }
+
   @Get('my-courses')
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   myCourses(@Req() request: Request & { user: { [key: string]: string } }) {
     const user = request.user;
     console.log(user);
@@ -44,5 +55,14 @@ export class UsersController {
   @Get(':id/roles')
   async getRoles(@Param('id') id: number) {
     return this.usersService.roles(id);
+  }
+
+  @Get('my-permissions')
+  getPermissions(
+    @Req() request: Request & { user: { [key: string]: string } },
+  ) {
+    const user = request.user;
+    const permissions = getPermissions(user);
+    return permissions;
   }
 }

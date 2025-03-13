@@ -30,7 +30,9 @@ export class User {
   @OneToOne(() => Phone, (phone) => phone.user)
   phone: Phone;
 
-  @ManyToMany(() => Role)
+  @ManyToMany(() => Role, {
+    eager: true,
+  })
   @JoinTable({
     name: 'users_roles',
     joinColumn: {
