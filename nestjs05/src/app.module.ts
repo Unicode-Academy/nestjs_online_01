@@ -11,6 +11,8 @@ import { Keyv } from 'keyv';
 import { CacheableMemory } from 'cacheable';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TaskService } from './task/task.service';
+import { AppGateway } from './gateway/app/app.gateway';
+import { NotificationGateway } from './gateway/notification/notification.gateway';
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { TaskService } from './task/task.service';
   providers: [
     AppService,
     TaskService,
+    AppGateway,
+    NotificationGateway,
     // {
     //   provide: APP_INTERCEPTOR,
     //   useClass: CacheInterceptor,
