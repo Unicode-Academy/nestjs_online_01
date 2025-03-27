@@ -40,4 +40,11 @@ export class PostsController {
   remove(@Param('id') id: number) {
     return this.postsService.remove(id);
   }
+
+  @Get('test')
+  test() {
+    return {
+      value: 'Test',
+    };
+  }
 }

@@ -1,0 +1,39 @@
+name: Auto Deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  main:
+    name: Auto Deploy to Production
+    if: github.event_name == 'push' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v0.1.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          password: ${{ secrets.PASS }}
+          port: ${{ secrets.PORT }}
+          script: |
+            export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            cd /home/nestjs_project
+            if [ -f package-lock.json]; then
+              git checkout package-lock.json
+            fi  
+            eval "$(ssh-agent -s)"
+            ssh-add ~/.ssh/nestjs
+            git pull origin main
+            npm install --legacy-peer-deps
+            npm run build
+            npm run migration:run
+            pm2 restart "nestjs_app"

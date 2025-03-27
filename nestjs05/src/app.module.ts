@@ -13,6 +13,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TaskService } from './task/task.service';
 import { AppGateway } from './gateway/app/app.gateway';
 import { NotificationGateway } from './gateway/notification/notification.gateway';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { NotificationGateway } from './gateway/notification/notification.gateway
     }),
     ScheduleModule.forRoot(),
     PostsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [

@@ -16,4 +16,11 @@ export class OrderController {
 
     return 'Thành công';
   }
+
+  @Get('test-1')
+  test() {
+    return {
+      value: 'ok chưa 1?',
+    };
+  }
 }
