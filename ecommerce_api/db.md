@@ -49,3 +49,5 @@ Khi khách hàng thực hiện thanh toán --> Tạo đơn hàng bên cổng tha
 Mã giảm giá
 
 (customer) && (brand || product || categories || condition)
+
+Link Diagram: https://dbdiagram.io/d/Nestjs01_Ecommerce_API-67e695734f7afba184927d09
