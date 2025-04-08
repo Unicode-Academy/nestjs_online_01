@@ -1,10 +1,12 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class CreateBrandsTable1743775641033 implements MigrationInterface {
+export class CreateDeliveryStatusTable1743779362797
+  implements MigrationInterface
+{
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'brands',
+        name: 'delivery_status',
         columns: [
           {
             name: 'id',
@@ -13,24 +15,10 @@ export class CreateBrandsTable1743775641033 implements MigrationInterface {
             isGenerated: true,
             generationStrategy: 'increment',
           },
+          //   'pending', 'confirmed', 'pick_up', 'on_the_way', 'delivered', 'cancel'
           {
             name: 'name',
-            type: 'varchar(200)',
-          },
-          {
-            name: 'slug',
-            type: 'varchar(200)',
-          },
-          {
-            name: 'image',
-            type: 'varchar(200)',
-            isNullable: true,
-          },
-          {
-            name: 'status',
-            type: 'enum',
-            enum: ['active', 'inactive'],
-            default: '"active"',
+            type: 'varchar(50)',
           },
           {
             name: 'created_at',
@@ -41,6 +29,7 @@ export class CreateBrandsTable1743775641033 implements MigrationInterface {
             name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
+            onUpdate: 'now()',
           },
         ],
       }),
@@ -48,6 +37,6 @@ export class CreateBrandsTable1743775641033 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('brands');
+    await queryRunner.dropTable('delivery_status', true);
   }
 }

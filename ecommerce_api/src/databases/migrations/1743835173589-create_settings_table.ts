@@ -1,15 +1,10 @@
-import {
-  MigrationInterface,
-  QueryRunner,
-  Table,
-  TableForeignKey,
-} from 'typeorm';
+import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class CreateDistrictsTable1743774534794 implements MigrationInterface {
+export class CreateSettingsTable1743835173589 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'districts',
+        name: 'settings',
         columns: [
           {
             name: 'id',
@@ -19,16 +14,18 @@ export class CreateDistrictsTable1743774534794 implements MigrationInterface {
             generationStrategy: 'increment',
           },
           {
-            name: 'name',
-            type: 'varchar(200)',
+            name: 'opt_key',
+            type: 'text',
           },
           {
-            name: 'prefix',
-            type: 'varchar(100)',
+            name: 'opt_value',
+            type: 'text',
           },
           {
-            name: 'province_id',
-            type: 'int',
+            name: 'status',
+            type: 'enum',
+            enum: ['active', 'inactive'],
+            default: '"active"',
           },
           {
             name: 'created_at',
@@ -39,23 +36,14 @@ export class CreateDistrictsTable1743774534794 implements MigrationInterface {
             name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
+            onUpdate: 'now()',
           },
         ],
-      }),
-    );
-    await queryRunner.createForeignKey(
-      'districts',
-      new TableForeignKey({
-        columnNames: ['province_id'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'provinces',
-        onDelete: 'CASCADE',
-        name: 'districts_province_id_foreign',
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('districts');
+    await queryRunner.dropTable('settings', true);
   }
 }

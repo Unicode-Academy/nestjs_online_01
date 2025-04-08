@@ -5,11 +5,13 @@ import {
   TableForeignKey,
 } from 'typeorm';
 
-export class CreateCategoriesTable1743775338522 implements MigrationInterface {
+export class CreatePaymentVnpayTable1743831484468
+  implements MigrationInterface
+{
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'categories',
+        name: 'payment_vnpay',
         columns: [
           {
             name: 'id',
@@ -19,33 +21,21 @@ export class CreateCategoriesTable1743775338522 implements MigrationInterface {
             generationStrategy: 'increment',
           },
           {
-            name: 'name',
-            type: 'varchar(200)',
-          },
-          {
-            name: 'slug',
-            type: 'varchar(200)',
-          },
-          {
-            name: 'parent_id',
+            name: 'payment_id',
             type: 'int',
-            isNullable: true,
           },
           {
-            name: 'status',
+            name: 'type',
             type: 'enum',
-            enum: ['active', 'inactive'],
-            default: '"active"',
+            enum: ['sandbox', 'live'],
           },
           {
-            name: 'image',
+            name: 'website_code',
+            type: 'varchar(100)',
+          },
+          {
+            name: 'hash_secret',
             type: 'varchar(200)',
-            isNullable: true,
-          },
-          {
-            name: 'description',
-            type: 'text',
-            isNullable: true,
           },
           {
             name: 'created_at',
@@ -56,22 +46,24 @@ export class CreateCategoriesTable1743775338522 implements MigrationInterface {
             name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
+            onUpdate: 'now()',
           },
         ],
       }),
     );
     await queryRunner.createForeignKey(
-      'categories',
+      'payment_vnpay',
       new TableForeignKey({
-        columnNames: ['parent_id'],
+        columnNames: ['payment_id'],
         referencedColumnNames: ['id'],
-        referencedTableName: 'categories',
-        name: 'categories_parent_id_foreign',
+        referencedTableName: 'payments',
+        onDelete: 'CASCADE',
+        name: 'payment_vnpay_payments_payment_id_foreign_key', // Cấu trúc bảng1_bảng2_column_foreign_key
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('categories');
+    await queryRunner.dropTable('payment_vnpay', true);
   }
 }

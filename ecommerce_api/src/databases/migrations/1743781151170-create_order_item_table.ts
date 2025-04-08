@@ -5,11 +5,11 @@ import {
   TableForeignKey,
 } from 'typeorm';
 
-export class CreateProductsTable1743775748007 implements MigrationInterface {
+export class CreateOrderItemTable1743781151170 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'products',
+        name: 'order_item',
         columns: [
           {
             name: 'id',
@@ -23,17 +23,16 @@ export class CreateProductsTable1743775748007 implements MigrationInterface {
             type: 'varchar(100)',
           },
           {
+            name: 'brand_id',
+            type: 'int',
+          },
+          {
             name: 'name',
             type: 'varchar(255)',
           },
           {
             name: 'slug',
             type: 'varchar(255)',
-          },
-          {
-            name: 'brand_id',
-            type: 'int',
-            isNullable: true,
           },
           {
             name: 'thumbnail',
@@ -53,24 +52,22 @@ export class CreateProductsTable1743775748007 implements MigrationInterface {
           {
             name: 'content',
             type: 'text',
-            isNullable: true,
           },
           {
-            name: 'rating',
-            type: 'double(20,2)',
-            isNullable: true,
-          },
-          {
-            name: 'type',
-            type: 'enum',
-            enum: ['simple', 'variant'],
-            default: '"simple"',
+            name: 'rating_ammount',
+            type: 'double(20, 2)',
+            default: 0,
           },
           {
             name: 'status',
             type: 'enum',
             enum: ['active', 'inactive'],
             default: '"active"',
+          },
+          {
+            name: 'type',
+            type: 'enum',
+            enum: ['simple', 'variant'],
           },
           {
             name: 'created_at',
@@ -81,22 +78,24 @@ export class CreateProductsTable1743775748007 implements MigrationInterface {
             name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
+            onUpdate: 'now()',
           },
         ],
       }),
     );
     await queryRunner.createForeignKey(
-      'products',
+      'order_item',
       new TableForeignKey({
         columnNames: ['brand_id'],
         referencedColumnNames: ['id'],
         referencedTableName: 'brands',
-        name: 'products_brand_id_foreign',
+        onDelete: 'CASCADE',
+        name: 'order_item_brands_brand_id_foreign_key', // Cấu trúc bảng1_bảng2_column_foreign_key
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('products');
+    await queryRunner.dropTable('order_item', true);
   }
 }

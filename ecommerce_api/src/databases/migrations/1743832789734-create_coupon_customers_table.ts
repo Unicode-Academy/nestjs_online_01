@@ -5,11 +5,14 @@ import {
   TableForeignKey,
 } from 'typeorm';
 
-export class CreateActiveTokenTable1743773961842 implements MigrationInterface {
+// Bảng mã giảm giá áp dụng cho khách hàng
+export class CreateCouponCustomersTable1743832789734
+  implements MigrationInterface
+{
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'active_token',
+        name: 'coupon_customers',
         columns: [
           {
             name: 'id',
@@ -19,16 +22,12 @@ export class CreateActiveTokenTable1743773961842 implements MigrationInterface {
             generationStrategy: 'increment',
           },
           {
-            name: 'user_id',
+            name: 'coupon_id',
             type: 'int',
           },
           {
-            name: 'token',
-            type: 'varchar(100)',
-          },
-          {
-            name: 'expire_at',
-            type: 'timestamp',
+            name: 'customer_id',
+            type: 'int',
           },
           {
             name: 'created_at',
@@ -39,24 +38,34 @@ export class CreateActiveTokenTable1743773961842 implements MigrationInterface {
             name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
+            onUpdate: 'now()',
           },
         ],
       }),
     );
-
     await queryRunner.createForeignKey(
-      'active_token',
+      'coupon_customers',
       new TableForeignKey({
-        columnNames: ['user_id'],
+        columnNames: ['coupon_id'],
         referencedColumnNames: ['id'],
-        referencedTableName: 'users',
+        referencedTableName: 'coupons',
         onDelete: 'CASCADE',
-        name: 'active_token_user_id_foreign',
+        name: 'coupon_customers_coupons_coupon_id_foreign_key', // Cấu trúc bảng1_bảng2_column_foreign_key
+      }),
+    );
+    await queryRunner.createForeignKey(
+      'coupon_customers',
+      new TableForeignKey({
+        columnNames: ['customer_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'customers',
+        onDelete: 'CASCADE',
+        name: 'coupon_customers_customers_customer_id_foreign_key', // Cấu trúc bảng1_bảng2_column_foreign_key
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('active_token');
+    await queryRunner.dropTable('coupon_customers', true);
   }
 }

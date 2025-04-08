@@ -5,13 +5,11 @@ import {
   TableForeignKey,
 } from 'typeorm';
 
-export class CreateReviewImagesTable1743776746336
-  implements MigrationInterface
-{
+export class CreateReviewLikesTable1743777114000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'review_images',
+        name: 'review_likes',
         columns: [
           {
             name: 'id',
@@ -21,19 +19,18 @@ export class CreateReviewImagesTable1743776746336
             generationStrategy: 'increment',
           },
           {
-            name: 'imageable_id',
+            name: 'customer_id',
             type: 'int',
           },
           {
-            name: 'imageable_type',
-            type: 'enum',
-            enum: ['review', 'reply'],
+            name: 'likeable_id',
+            type: 'int',
           },
           {
-            name: 'image',
-            type: 'varchar(200)',
+            name: 'likeable_type',
+            type: 'enum',
+            enum: ['product_reviews', 'reviews_reply'],
           },
-
           {
             name: 'created_at',
             type: 'timestamp',
@@ -43,33 +40,34 @@ export class CreateReviewImagesTable1743776746336
             name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
+            onUpdate: 'now()',
           },
         ],
       }),
     );
     await queryRunner.createForeignKey(
-      'review_images',
+      'review_likes',
       new TableForeignKey({
-        columnNames: ['imageable_id'],
+        columnNames: ['likeable_id'],
         referencedColumnNames: ['id'],
-        referencedTableName: 'reviews',
+        referencedTableName: 'product_reviews',
         onDelete: 'CASCADE',
-        name: 'review_images_imageable_id_reviews_foreign',
+        name: 'review_likes_product_reviews_likeable_id_foreign_key', // Cấu trúc bảng1_bảng2_column_foreign_key
       }),
     );
     await queryRunner.createForeignKey(
-      'review_images',
+      'review_likes',
       new TableForeignKey({
-        columnNames: ['imageable_id'],
+        columnNames: ['likeable_id'],
         referencedColumnNames: ['id'],
         referencedTableName: 'reviews_reply',
         onDelete: 'CASCADE',
-        name: 'review_images_imageable_id_reviews_reply_foreign',
+        name: 'review_likes_reviews_reply_likeable_id_foreign_key', // Cấu trúc bảng1_bảng2_column_foreign_key
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('review_images');
+    await queryRunner.dropTable('review_likes', true);
   }
 }

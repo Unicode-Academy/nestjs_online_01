@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class CreateProvincesTable1743774424914 implements MigrationInterface {
+export class CreateBrandsTable1743775597225 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'provinces',
+        name: 'brands',
         columns: [
           {
             name: 'id',
@@ -18,8 +18,20 @@ export class CreateProvincesTable1743774424914 implements MigrationInterface {
             type: 'varchar(200)',
           },
           {
-            name: 'prefix',
-            type: 'varchar(100)',
+            name: 'slug',
+            type: 'varchar(200)',
+          },
+          {
+            name: 'image',
+            type: 'varchar(200)',
+            isNullable: true,
+            default: null,
+          },
+          {
+            name: 'status',
+            type: 'enum',
+            enum: ['active', 'inactive'],
+            default: '"active"',
           },
           {
             name: 'created_at',
@@ -30,6 +42,7 @@ export class CreateProvincesTable1743774424914 implements MigrationInterface {
             name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
+            onUpdate: 'now()',
           },
         ],
       }),
@@ -37,6 +50,6 @@ export class CreateProvincesTable1743774424914 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('provinces');
+    await queryRunner.dropTable('brands', true);
   }
 }

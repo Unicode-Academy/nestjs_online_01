@@ -5,13 +5,13 @@ import {
   TableForeignKey,
 } from 'typeorm';
 
-export class CreateReviewsReplyTable1743776512656
+export class CreateVariantImagesTable1743779124737
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'reviews_reply',
+        name: 'variant_images',
         columns: [
           {
             name: 'id',
@@ -21,18 +21,21 @@ export class CreateReviewsReplyTable1743776512656
             generationStrategy: 'increment',
           },
           {
-            name: 'review_id',
+            name: 'product_id',
             type: 'int',
           },
           {
-            name: 'comment',
-            type: 'text',
+            name: 'variant_id',
+            type: 'int',
           },
           {
-            name: 'status',
-            type: 'enum',
-            enum: ['active', 'inactive'],
-            default: '"active"',
+            name: 'image',
+            type: 'varchar(200)',
+          },
+          {
+            name: 'price',
+            type: 'int',
+            default: 0,
           },
           {
             name: 'created_at',
@@ -43,23 +46,34 @@ export class CreateReviewsReplyTable1743776512656
             name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
+            onUpdate: 'now()',
           },
         ],
       }),
     );
     await queryRunner.createForeignKey(
-      'reviews_reply',
+      'variant_images',
       new TableForeignKey({
-        columnNames: ['review_id'],
+        columnNames: ['product_id'],
         referencedColumnNames: ['id'],
-        referencedTableName: 'reviews',
+        referencedTableName: 'products',
         onDelete: 'CASCADE',
-        name: 'reviews_reply_review_id_foreign',
+        name: 'variant_images_products_product_id_foreign_key', // Cấu trúc bảng1_bảng2_column_foreign_key
+      }),
+    );
+    await queryRunner.createForeignKey(
+      'variant_images',
+      new TableForeignKey({
+        columnNames: ['variant_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'variants',
+        onDelete: 'CASCADE',
+        name: 'variant_images_variants_variant_id_foreign_key', // Cấu trúc bảng1_bảng2_column_foreign_key
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('reviews_reply');
+    await queryRunner.dropTable('variant_images', true);
   }
 }

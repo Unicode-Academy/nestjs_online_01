@@ -5,11 +5,13 @@ import {
   TableForeignKey,
 } from 'typeorm';
 
-export class CreateWardsTable1743774698074 implements MigrationInterface {
+export class CreateVariantsAttributeValueTable1743779250816
+  implements MigrationInterface
+{
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'wards',
+        name: 'variants_attribute_value',
         columns: [
           {
             name: 'id',
@@ -19,19 +21,11 @@ export class CreateWardsTable1743774698074 implements MigrationInterface {
             generationStrategy: 'increment',
           },
           {
-            name: 'name',
-            type: 'varchar(200)',
-          },
-          {
-            name: 'prefix',
-            type: 'varchar(100)',
-          },
-          {
-            name: 'province_id',
+            name: 'variant_id',
             type: 'int',
           },
           {
-            name: 'district_id',
+            name: 'attribute_value_id',
             type: 'int',
           },
           {
@@ -43,33 +37,34 @@ export class CreateWardsTable1743774698074 implements MigrationInterface {
             name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
+            onUpdate: 'now()',
           },
         ],
       }),
     );
     await queryRunner.createForeignKey(
-      'wards',
+      'variants_attribute_value',
       new TableForeignKey({
-        columnNames: ['province_id'],
+        columnNames: ['attribute_value_id'],
         referencedColumnNames: ['id'],
-        referencedTableName: 'provinces',
+        referencedTableName: 'attribute_values',
         onDelete: 'CASCADE',
-        name: 'wards_province_id_foreign',
+        name: 'variants_attribute_value_attribute_value_id_foreign_key', // Cấu trúc bảng1_bảng2_column_foreign_key
       }),
     );
     await queryRunner.createForeignKey(
-      'wards',
+      'variants_attribute_value',
       new TableForeignKey({
-        columnNames: ['district_id'],
+        columnNames: ['variant_id'],
         referencedColumnNames: ['id'],
-        referencedTableName: 'districts',
+        referencedTableName: 'variants',
         onDelete: 'CASCADE',
-        name: 'wards_district_id_foreign',
+        name: 'variants_attribute_value_variants_variant_id_foreign_key', // Cấu trúc bảng1_bảng2_column_foreign_key
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('wards');
+    await queryRunner.dropTable('variants_attribute_value', true);
   }
 }

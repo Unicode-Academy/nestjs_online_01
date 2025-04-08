@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class CreateUsersTable1743770544990 implements MigrationInterface {
+export class CreateUsersTable1743770563738 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
@@ -20,6 +20,7 @@ export class CreateUsersTable1743770544990 implements MigrationInterface {
           {
             name: 'email',
             type: 'varchar(100)',
+            isUnique: true,
           },
           {
             name: 'password',
@@ -28,18 +29,21 @@ export class CreateUsersTable1743770544990 implements MigrationInterface {
           },
           {
             name: 'status',
-            type: `enum`,
+            type: 'enum',
             enum: ['active', 'inactive'],
+            enumName: 'statusEnum',
             default: '"active"',
           },
           {
             name: 'user_type',
             type: 'enum',
-            enum: ['user', 'admin'],
+            enum: ['admin', 'user'],
+            default: '"user"',
           },
           {
             name: 'verify_at',
             type: 'timestamp',
+            isNullable: true,
           },
           {
             name: 'created_at',
@@ -50,9 +54,13 @@ export class CreateUsersTable1743770544990 implements MigrationInterface {
             name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
+            onUpdate: 'now()',
           },
         ],
       }),
+    );
+    await queryRunner.query(
+      `CREATE UNIQUE INDEX users_email_unique ON users(email)`,
     );
   }
 

@@ -18,6 +18,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
         : HttpStatus.INTERNAL_SERVER_ERROR;
     return response
       .status(status)
-      .json(errorResponse(exception.response.error, exception.message));
+      .json(errorResponse(exception.response?.message, exception.message));
   }
 }

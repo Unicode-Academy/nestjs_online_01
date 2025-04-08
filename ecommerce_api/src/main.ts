@@ -1,7 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { VersioningType } from '@nestjs/common';
+import {
+  BadRequestException,
+  ValidationPipe,
+  VersioningType,
+} from '@nestjs/common';
 import { AllExceptionsFilter } from './common/exceptions/http-exception';
+import { ValidationError } from 'class-validator';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -10,6 +15,20 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
   app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true, //Tự động chuyển kiểu dữ liệu
+      exceptionFactory: (errors: ValidationError[]) => {
+        return new BadRequestException(
+          errors.map((error) => {
+            return {
+              [error.property]: Object.values(error.constraints)[0],
+            };
+          }),
+        );
+      },
+    }),
+  );
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

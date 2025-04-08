@@ -5,11 +5,13 @@ import {
   TableForeignKey,
 } from 'typeorm';
 
-export class CreateReviewsTable1743776276793 implements MigrationInterface {
+export class CreateProductsAttributeValuesTable1743777918034
+  implements MigrationInterface
+{
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'reviews',
+        name: 'products_attribute_values',
         columns: [
           {
             name: 'id',
@@ -23,23 +25,12 @@ export class CreateReviewsTable1743776276793 implements MigrationInterface {
             type: 'int',
           },
           {
-            name: 'rating',
-            type: 'tinyint',
-          },
-          {
-            name: 'customer_id',
+            name: 'attribute_id',
             type: 'int',
           },
           {
-            name: 'comment',
-            type: 'text',
-            isNullable: true,
-          },
-          {
-            name: 'status',
-            type: 'enum',
-            enum: ['active', 'inactive'],
-            default: '"active"',
+            name: 'attribute_value_id',
+            type: 'int',
           },
           {
             name: 'created_at',
@@ -50,31 +41,44 @@ export class CreateReviewsTable1743776276793 implements MigrationInterface {
             name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
+            onUpdate: 'now()',
           },
         ],
       }),
     );
     await queryRunner.createForeignKey(
-      'reviews',
+      'products_attribute_values',
       new TableForeignKey({
         columnNames: ['product_id'],
         referencedColumnNames: ['id'],
         referencedTableName: 'products',
-        name: 'reviews_product_id_foreign',
+        onDelete: 'CASCADE',
+        name: 'products_attribute_values_products_product_id_foreign_key', // Cấu trúc bảng1_bảng2_column_foreign_key
       }),
     );
     await queryRunner.createForeignKey(
-      'reviews',
+      'products_attribute_values',
       new TableForeignKey({
-        columnNames: ['customer_id'],
+        columnNames: ['attribute_id'],
         referencedColumnNames: ['id'],
-        referencedTableName: 'customers',
-        name: 'reviews_customer_id_foreign',
+        referencedTableName: 'attributes',
+        onDelete: 'CASCADE',
+        name: 'products_attribute_values_attributes_attribute_id_foreign_key', // Cấu trúc bảng1_bảng2_column_foreign_key
+      }),
+    );
+    await queryRunner.createForeignKey(
+      'products_attribute_values',
+      new TableForeignKey({
+        columnNames: ['attribute_value_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'attribute_values',
+        onDelete: 'CASCADE',
+        name: 'products_attribute_values_attribute_value_id_foreign_key', // Cấu trúc bảng1_bảng2_column_foreign_key
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('reviews');
+    await queryRunner.dropTable('products_attribute_values', true);
   }
 }

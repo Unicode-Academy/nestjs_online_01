@@ -5,11 +5,14 @@ import {
   TableForeignKey,
 } from 'typeorm';
 
-export class CreateAddressListTable1743774885998 implements MigrationInterface {
+// Bảng lưu note của đơn hàng
+// Khách hàng note
+// Admin note
+export class CreateOrderNotesTable1743830938402 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'address_list',
+        name: 'order_notes',
         columns: [
           {
             name: 'id',
@@ -19,24 +22,20 @@ export class CreateAddressListTable1743774885998 implements MigrationInterface {
             generationStrategy: 'increment',
           },
           {
-            name: 'customer_id',
+            name: 'customer_order_id',
             type: 'int',
           },
           {
-            name: 'province_id',
+            name: 'user_id',
             type: 'int',
           },
           {
-            name: 'district_id',
+            name: 'order_id',
             type: 'int',
           },
           {
-            name: 'ward_id',
-            type: 'int',
-          },
-          {
-            name: 'address',
-            type: 'varchar(200)',
+            name: 'note',
+            type: 'text',
           },
           {
             name: 'created_at',
@@ -47,53 +46,44 @@ export class CreateAddressListTable1743774885998 implements MigrationInterface {
             name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
+            onUpdate: 'now()',
           },
         ],
       }),
     );
     await queryRunner.createForeignKey(
-      'address_list',
+      'order_notes',
       new TableForeignKey({
-        columnNames: ['customer_id'],
+        columnNames: ['customer_order_id'],
         referencedColumnNames: ['id'],
-        referencedTableName: 'customers',
+        referencedTableName: 'customer_order',
         onDelete: 'CASCADE',
-        name: 'address_list_customer_id_foreign',
+        name: 'order_notes_customer_order_id_foreign_key', // Cấu trúc bảng1_bảng2_column_foreign_key
       }),
     );
     await queryRunner.createForeignKey(
-      'address_list',
+      'order_notes',
       new TableForeignKey({
-        columnNames: ['province_id'],
+        columnNames: ['user_id'],
         referencedColumnNames: ['id'],
-        referencedTableName: 'provinces',
+        referencedTableName: 'users',
         onDelete: 'CASCADE',
-        name: 'address_list_province_id_foreign',
+        name: 'order_notes_users_user_id_foreign_key', // Cấu trúc bảng1_bảng2_column_foreign_key
       }),
     );
     await queryRunner.createForeignKey(
-      'address_list',
+      'order_notes',
       new TableForeignKey({
-        columnNames: ['district_id'],
+        columnNames: ['order_id'],
         referencedColumnNames: ['id'],
-        referencedTableName: 'districts',
+        referencedTableName: 'orders',
         onDelete: 'CASCADE',
-        name: 'address_list_district_id_foreign',
-      }),
-    );
-    await queryRunner.createForeignKey(
-      'address_list',
-      new TableForeignKey({
-        columnNames: ['ward_id'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'wards',
-        onDelete: 'CASCADE',
-        name: 'address_list_ward_id_foreign',
+        name: 'order_notes_orders_order_id_foreign_key', // Cấu trúc bảng1_bảng2_column_foreign_key
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('address_list');
+    await queryRunner.dropTable('order_notes', true);
   }
 }

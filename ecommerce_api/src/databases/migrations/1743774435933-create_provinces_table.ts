@@ -1,17 +1,10 @@
-import {
-  MigrationInterface,
-  QueryRunner,
-  Table,
-  TableForeignKey,
-} from 'typeorm';
+import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class CreatePasswordTokensTable1743773698903
-  implements MigrationInterface
-{
+export class CreateProvincesTable1743774435933 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'password_token',
+        name: 'provinces',
         columns: [
           {
             name: 'id',
@@ -21,16 +14,12 @@ export class CreatePasswordTokensTable1743773698903
             generationStrategy: 'increment',
           },
           {
-            name: 'user_id',
-            type: 'int',
+            name: 'name',
+            type: 'varchar(200)',
           },
           {
-            name: 'token',
+            name: 'prefix',
             type: 'varchar(100)',
-          },
-          {
-            name: 'expire_at',
-            type: 'timestamp',
           },
           {
             name: 'created_at',
@@ -41,24 +30,14 @@ export class CreatePasswordTokensTable1743773698903
             name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
+            onUpdate: 'now()',
           },
         ],
-      }),
-    );
-
-    await queryRunner.createForeignKey(
-      'password_token',
-      new TableForeignKey({
-        columnNames: ['user_id'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'users',
-        onDelete: 'CASCADE',
-        name: 'password_token_user_id_foreign',
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('password_token');
+    await queryRunner.dropTable('provinces', true);
   }
 }

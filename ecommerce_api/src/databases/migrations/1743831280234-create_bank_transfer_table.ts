@@ -5,13 +5,13 @@ import {
   TableForeignKey,
 } from 'typeorm';
 
-export class CreateProductImagesTable1743776102395
+export class CreateBankTransferTable1743831280234
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'product_images',
+        name: 'bank_transfer',
         columns: [
           {
             name: 'id',
@@ -21,12 +21,24 @@ export class CreateProductImagesTable1743776102395
             generationStrategy: 'increment',
           },
           {
-            name: 'product_id',
+            name: 'payment_id',
             type: 'int',
           },
           {
-            name: 'image',
-            type: 'varchar(200)',
+            name: 'bank_account',
+            type: 'varchar(100)',
+          },
+          {
+            name: 'bank_name',
+            type: 'varchar(100)',
+          },
+          {
+            name: 'bank_number',
+            type: 'varchar(100)',
+          },
+          {
+            name: 'bank_content',
+            type: 'text',
           },
           {
             name: 'created_at',
@@ -37,22 +49,24 @@ export class CreateProductImagesTable1743776102395
             name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
+            onUpdate: 'now()',
           },
         ],
       }),
     );
     await queryRunner.createForeignKey(
-      'product_images',
+      'bank_transfer',
       new TableForeignKey({
-        columnNames: ['product_id'],
+        columnNames: ['payment_id'],
         referencedColumnNames: ['id'],
-        referencedTableName: 'products',
-        name: 'product_images_product_id_foreign',
+        referencedTableName: 'payments',
+        onDelete: 'CASCADE',
+        name: 'bank_transfer_payments_payment_id_foreign_key', // Cấu trúc bảng1_bảng2_column_foreign_key
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('product_images');
+    await queryRunner.dropTable('bank_transfer', true);
   }
 }
