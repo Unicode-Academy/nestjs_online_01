@@ -61,9 +61,9 @@ export class UsersService {
 
   //SELECT * FROM users WHERE status='active' AND (name LIKE '%user1%' OR email LIKE '%user1%')
 
-  find(id: number) {
+  find(value: number | string, field: string = 'id') {
     return this.usersRepository.findOne({
-      where: { id },
+      where: { [field]: value },
       // select: {
       //   name: true,
       // },

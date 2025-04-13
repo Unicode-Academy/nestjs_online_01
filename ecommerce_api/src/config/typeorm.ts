@@ -15,6 +15,7 @@ const config = {
   seeds: ['dist/**/databases/seeders/**/*.js'],
   autoLoadEntities: true,
   synchronize: false,
+  logging: true,
 };
 
 export default registerAs('typeorm', () => config);

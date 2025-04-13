@@ -4,6 +4,8 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -16,21 +18,23 @@ export class PasswordToken {
   @Column()
   token: string;
 
-  @Column()
-  expire_at: Date;
+  @CreateDateColumn({
+    type: 'timestamp',
+  })
+  expire_at: string;
 
   @ManyToOne(() => User, (user) => user.passwordToken)
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @Column({
+  @CreateDateColumn({
     type: 'timestamp',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   created_at: Date;
 
-  @Column({
+  @UpdateDateColumn({
     type: 'timestamp',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
