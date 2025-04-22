@@ -41,7 +41,9 @@ export class User {
   @OneToMany(() => PasswordToken, (token) => token.user)
   passwordToken: PasswordToken[];
 
-  @OneToOne(() => Customer, (customer) => customer.user)
+  @OneToOne(() => Customer, (customer) => customer.user, {
+    eager: true,
+  })
   customer: Customer;
 
   @Column({

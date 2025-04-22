@@ -61,18 +61,20 @@ export class UsersService {
 
   //SELECT * FROM users WHERE status='active' AND (name LIKE '%user1%' OR email LIKE '%user1%')
 
-  find(value: number | string, field: string = 'id') {
-    return this.usersRepository.findOne({
+  async find(value: number | string, field: string = 'id') {
+    const user = await this.usersRepository.findOne({
       where: { [field]: value },
-      // select: {
-      //   name: true,
-      // },
     });
+
+    if (!user.customer) {
+      delete user.customer;
+    }
+    return user;
   }
 
-  create(userData: CreateUserDto) {
+  create(userData: CreateUserDto, userType: string = 'admin') {
     userData.password = Hash.make(userData.password);
-    userData.user_type = 'admin';
+    userData.user_type = userType;
     if (userData.status === 'active') {
       userData.verify_at = new Date();
     }

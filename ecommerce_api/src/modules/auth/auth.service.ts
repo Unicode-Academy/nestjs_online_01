@@ -6,12 +6,15 @@ import { User } from 'src/entities/user.entity';
 import { generateOTP, generateToken } from 'src/utils/token';
 import { PasswordTokenService } from './password-token.service';
 import * as moment from 'moment-timezone';
+import RegisterDto from './dto/register.dto';
+import { CustomersService } from '../customers/customers.service';
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
     private passwordTokenService: PasswordTokenService,
+    private customerService: CustomersService,
   ) {}
 
   async login(email: string, password: string) {
@@ -26,6 +29,10 @@ export class AuthService {
       return null;
     }
 
+    return this.createToken(user);
+  }
+
+  async loginByUser(user: any) {
     return this.createToken(user);
   }
 
@@ -72,6 +79,62 @@ export class AuthService {
       return passwordToken;
     }
     return false;
+  }
+
+  async register(body: RegisterDto): Promise<any> {
+    body.status = 'inactive';
+
+    //Kiểm tra email trùng lặp
+    const existEmail = await this.usersService.existEmail(body.email);
+    if (existEmail) {
+      return {
+        error: 'user-exist',
+      };
+    }
+    //Xử lý đăng ký
+    //1. Thêm user
+    const user = await this.usersService.create(body, 'user');
+    //2. Thêm customer
+    await this.customerService.create({
+      user,
+      phone: body.phone,
+    });
+    return { tokens: await this.loginByUser(user), user };
+  }
+
+  async updateProfile({ name, email, phone, ...rest }: any, user: any) {
+    if (user.user_type === 'admin') {
+      //Xử lý update với user admin
+      const userUpdate = { ...user, name, email };
+      delete userUpdate.password;
+      await this.usersService.update(userUpdate, user.id);
+    } else {
+      const userUpdate = { ...user, name, email };
+      const customer = { ...user.customer };
+      delete userUpdate.customer;
+      delete userUpdate.password;
+      const customerUpdate = {
+        phone,
+        ...rest,
+      };
+
+      await this.usersService.update(userUpdate, userUpdate.id);
+      await this.customerService.update(customerUpdate, customer.id);
+    }
+
+    return this.usersService.find(user.id);
+  }
+
+  async checkOldPassword(oldPassword: string, user: any) {
+    const passwordHash = user.password;
+    if (!Hash.verify(oldPassword, passwordHash)) {
+      return false;
+    }
+    return true;
+  }
+
+  async changePassword(password: string, userId: number) {
+    return this.usersService.update({ password }, userId);
   }
 
   private decodedToken(token: string) {

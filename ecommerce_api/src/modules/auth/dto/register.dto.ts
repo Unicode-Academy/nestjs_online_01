@@ -1,11 +1,6 @@
-import {
-  IsNotEmpty,
-  IsEmail,
-  MinLength,
-  ValidateIf,
-  IsIn,
-} from 'class-validator';
-export default class CreateUserDto {
+import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
+
+export default class RegisterDto {
   @IsNotEmpty({
     message: 'Vui lòng nhập tên',
   })
@@ -24,12 +19,10 @@ export default class CreateUserDto {
     message: 'Mật khẩu phải từ 6 ký tự',
   })
   password: string;
-
-  @IsIn(['active', 'inactive'], {
-    message: 'Trạng thái không hợp lệ',
+  @IsNotEmpty({
+    message: 'Vui lòng nhập số điện thoại',
   })
-  status?: string;
+  phone: string;
 
-  user_type?: string;
-  verify_at?: Date;
+  status?: string;
 }

@@ -10,6 +10,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 import { defaultOptions, transport } from './config/mail';
+import { CustomersModule } from './modules/customers/customers.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { defaultOptions, transport } from './config/mail';
     }),
     UsersModule,
     AuthModule,
+    CustomersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

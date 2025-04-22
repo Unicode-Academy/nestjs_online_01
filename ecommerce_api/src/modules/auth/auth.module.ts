@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PasswordToken } from 'src/entities/password_token.entity';
 import ForgotPasswordNotification from 'src/common/notifications/forgot-password.notification';
 import ResetPasswordNotification from 'src/common/notifications/reset-password.notification';
+import { CustomersModule } from '../customers/customers.module';
 
 @Module({
   controllers: [AuthController],
@@ -16,6 +17,10 @@ import ResetPasswordNotification from 'src/common/notifications/reset-password.n
     ForgotPasswordNotification,
     ResetPasswordNotification,
   ],
-  imports: [UsersModule, TypeOrmModule.forFeature([PasswordToken])],
+  imports: [
+    UsersModule,
+    CustomersModule,
+    TypeOrmModule.forFeature([PasswordToken]),
+  ],
 })
 export class AuthModule {}

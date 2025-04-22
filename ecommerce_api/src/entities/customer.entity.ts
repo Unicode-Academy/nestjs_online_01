@@ -22,7 +22,7 @@ export class Customer {
   phone: string;
 
   @Column()
-  birthday: Date;
+  birthday: string;
 
   @Column()
   gender: string;
