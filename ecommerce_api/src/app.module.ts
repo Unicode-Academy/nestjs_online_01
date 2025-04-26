@@ -11,6 +11,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 import { defaultOptions, transport } from './config/mail';
 import { CustomersModule } from './modules/customers/customers.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { IsUniqueConstraint } from './common/validation/UniqueConstraint';
 
 @Module({
   imports: [
@@ -42,8 +44,9 @@ import { CustomersModule } from './modules/customers/customers.module';
     UsersModule,
     AuthModule,
     CustomersModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, IsUniqueConstraint],
 })
 export class AppModule {}
