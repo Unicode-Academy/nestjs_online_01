@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
@@ -18,9 +18,10 @@ import { CustomersModule } from '../customers/customers.module';
     ResetPasswordNotification,
   ],
   imports: [
-    UsersModule,
+    forwardRef(() => UsersModule),
     CustomersModule,
     TypeOrmModule.forFeature([PasswordToken]),
   ],
+  exports: [AuthService],
 })
 export class AuthModule {}

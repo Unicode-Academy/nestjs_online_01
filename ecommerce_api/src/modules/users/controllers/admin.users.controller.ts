@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { VERSION } from 'src/constants/version';
 import Hash from 'src/utils/hashing';
@@ -16,11 +17,14 @@ import CreateUserDto from '../dto/create-user.dto';
 import { successResponse } from 'src/utils/response';
 import { UsersService } from '../users.service';
 import UpdateUserDto from '../dto/update-user.dto';
+import { AuthGuard } from 'src/common/guards/auth/auth.guard';
+import { AdminAuthGuard } from 'src/common/guards/auth/admin.auth.guard';
 
 @Controller({
   path: 'admin/users',
   version: VERSION.V1,
 })
+@UseGuards(AuthGuard, AdminAuthGuard)
 export class AdminUsersController {
   constructor(private readonly usersService: UsersService) {}
   @Get()

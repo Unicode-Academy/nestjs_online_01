@@ -13,6 +13,9 @@ import { defaultOptions, transport } from './config/mail';
 import { CustomersModule } from './modules/customers/customers.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { IsUniqueConstraint } from './common/validation/UniqueConstraint';
+import { BrandsModule } from './modules/brands/brands.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -41,10 +44,14 @@ import { IsUniqueConstraint } from './common/validation/UniqueConstraint';
         },
       },
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+    }),
     UsersModule,
     AuthModule,
     CustomersModule,
     CategoriesModule,
+    BrandsModule,
   ],
   controllers: [AppController],
   providers: [AppService, IsUniqueConstraint],

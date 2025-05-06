@@ -8,29 +8,11 @@ import {
   ManyToOne,
 } from 'typeorm';
 
-@Entity('categories')
+@Entity('brands')
 //PascalCase
-export class Category {
+export class Brand {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column({
-    type: 'timestamp',
-    nullable: true,
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  created_at: Date;
-
-  @OneToMany(() => Category, (category) => category.parent)
-  @JoinColumn({ name: 'parent_id' })
-  children: Category[];
-
-  @ManyToOne(() => Category, (category) => category.children)
-  @JoinColumn({ name: 'parent_id' })
-  parent: Category;
-
-  @Column()
-  parent_id: number;
 
   @Column()
   name: string;
@@ -44,8 +26,12 @@ export class Category {
   @Column()
   image: string;
 
-  @Column()
-  description: string;
+  @Column({
+    type: 'timestamp',
+    nullable: true,
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  created_at: Date;
 
   @Column({
     type: 'timestamp',

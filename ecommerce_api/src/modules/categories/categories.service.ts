@@ -48,11 +48,12 @@ export class CategoriesService {
     return [data, count];
   }
 
-  async find(id: number) {
+  async find(id: number, relations = {}) {
     return this.categoriesRepository.findOne({
       where: {
         id,
       },
+      relations,
     });
   }
 
@@ -107,5 +108,27 @@ export class CategoriesService {
     return this.categoriesRepository.findOne({
       where,
     });
+  }
+
+  public async delete(id: number) {
+    const category = await this.find(id, {
+      children: true,
+      parent: true,
+    });
+
+    if (!category) {
+      return false;
+    }
+
+    if (category.children.length) {
+      //Có chuyên mục con --> Lấy từng chuyên mục con --> update parent_id
+      for (const categoryChildren of category.children) {
+        categoryChildren.parent = { ...category.parent };
+        await this.categoriesRepository.save(categoryChildren);
+      }
+    }
+
+    await this.categoriesRepository.delete(id);
+    return category;
   }
 }

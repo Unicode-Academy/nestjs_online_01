@@ -2,23 +2,28 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { successResponse } from 'src/utils/response';
 import { VERSION } from 'src/constants/version';
 import CreateCategoryDto from './dto/create-category.dto';
 import UpdateCategoryDto from './dto/update-category.dto';
+import { AuthGuard } from 'src/common/guards/auth/auth.guard';
+import { AdminAuthGuard } from 'src/common/guards/auth/admin.auth.guard';
 
 @Controller({
   path: 'admin/categories',
   version: VERSION.V1,
 })
+@UseGuards(AuthGuard, AdminAuthGuard)
 export class AdminCategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
   @Get()
@@ -79,5 +84,15 @@ export class AdminCategoriesController {
       throw new NotFoundException('Category is not exist');
     }
     return successResponse(data, 'Category updated successfully');
+  }
+
+  @Delete(':id')
+  async delete(@Param('id') id: number) {
+    const category = await this.categoriesService.delete(id);
+
+    if (!category) {
+      throw new NotFoundException('Category is not exist');
+    }
+    return successResponse(category, 'Category deleted successfully');
   }
 }
