@@ -16,6 +16,7 @@ import { IsUniqueConstraint } from './common/validation/UniqueConstraint';
 import { BrandsModule } from './modules/brands/brands.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { ProductsModule } from './modules/products/products.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { join } from 'path';
     CustomersModule,
     CategoriesModule,
     BrandsModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService, IsUniqueConstraint],

@@ -45,16 +45,26 @@ export class BrandsService {
     const data = await queryBuilder.getMany();
     const count = await queryBuilder.getCount();
 
-    return [data, count];
+    return [
+      data.map((item) => ({
+        ...item,
+        image: item.image ? `${process.env.APP_URL}/${item.image}` : null,
+      })),
+      count,
+    ];
   }
 
   async find(id: number, relations = {}) {
-    return this.brandsRepository.findOne({
+    const data = await this.brandsRepository.findOne({
       where: {
         id,
       },
       relations,
     });
+    if (data.image) {
+      data.image = `${process.env.APP_URL}/${data.image}`;
+    }
+    return data;
   }
 
   async create(brandData: CreateBrandDto) {
@@ -70,7 +80,11 @@ export class BrandsService {
       }
     }
 
-    return this.brandsRepository.save(dataCreate);
+    const data = await this.brandsRepository.save(dataCreate);
+    if (data.image) {
+      data.image = `${process.env.APP_URL}/${data.image}`;
+    }
+    return data;
   }
 
   public async findBySlug(slug: string, id: number = 0) {
@@ -80,9 +94,13 @@ export class BrandsService {
     if (id) {
       where.id = Not<number>(id);
     }
-    return this.brandsRepository.findOne({
+    const data = await this.brandsRepository.findOne({
       where,
     });
+    if (data.image) {
+      data.image = `${process.env.APP_URL}/${data.image}`;
+    }
+    return data;
   }
 
   async update(brandData: any, id: number) {

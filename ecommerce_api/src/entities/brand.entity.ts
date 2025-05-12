@@ -7,6 +7,7 @@ import {
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
+import { Product } from './product.entity';
 
 @Entity('brands')
 //PascalCase
@@ -25,6 +26,9 @@ export class Brand {
 
   @Column()
   image: string;
+
+  @OneToMany(() => Product, (product) => product.brand)
+  products: Product[];
 
   @Column({
     type: 'timestamp',

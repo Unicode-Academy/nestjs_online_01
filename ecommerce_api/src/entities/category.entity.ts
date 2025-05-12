@@ -6,20 +6,15 @@ import {
   OneToOne,
   JoinColumn,
   ManyToOne,
+  ManyToMany,
 } from 'typeorm';
+import { Product } from './product.entity';
 
 @Entity('categories')
 //PascalCase
 export class Category {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column({
-    type: 'timestamp',
-    nullable: true,
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  created_at: Date;
 
   @OneToMany(() => Category, (category) => category.parent)
   @JoinColumn({ name: 'parent_id' })
@@ -46,6 +41,16 @@ export class Category {
 
   @Column()
   description: string;
+
+  @ManyToMany(() => Product, (product) => product.categories)
+  products: Product[];
+
+  @Column({
+    type: 'timestamp',
+    nullable: true,
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  created_at: Date;
 
   @Column({
     type: 'timestamp',

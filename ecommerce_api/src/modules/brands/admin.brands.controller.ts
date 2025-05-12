@@ -56,11 +56,12 @@ export class AdminBrandsController {
   }
 
   @Post()
-  async create(@Body() { name, slug, status }: CreateBrandDto) {
+  async create(@Body() { name, slug, status, image }: CreateBrandDto) {
     const data = await this.brandsService.create({
       name,
       slug,
       status,
+      image,
     });
     return successResponse(data, 'Brand created successfully');
   }
@@ -106,7 +107,7 @@ export class AdminBrandsController {
     FileInterceptor('image', {
       storage: getStorage('/brands'),
       fileFilter: multerConfig.fileFilter,
-      limits: { fileSize: 1024 * 1024 }, // Limit file size to 1MB
+      limits: { fileSize: APP.MAX_IMAGE_SIZE },
     }),
   )
   uploadFile(

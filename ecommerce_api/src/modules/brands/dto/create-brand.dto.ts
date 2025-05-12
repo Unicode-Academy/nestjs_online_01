@@ -19,4 +19,6 @@ export default class CreateBrandDto {
     message: 'Trạng thái không hợp lệ',
   })
   status: string;
+
+  image?: string;
 }

@@ -18,6 +18,9 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true, //Tự động chuyển kiểu dữ liệu
+      transformOptions: {
+        exposeDefaultValues: true,
+      },
       exceptionFactory: (errors: ValidationError[]) => {
         return new BadRequestException(
           errors.map((error) => {

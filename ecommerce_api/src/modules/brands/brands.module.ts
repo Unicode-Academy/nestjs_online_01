@@ -13,6 +13,7 @@ import { multerConfig } from 'src/config/multer';
 @Module({
   controllers: [BrandsController, AdminBrandsController],
   providers: [BrandsService],
+  exports: [BrandsService],
   imports: [
     AuthModule,
     TypeOrmModule.forFeature([Brand]),

@@ -27,7 +27,7 @@ export const getStorage = (folder: string) => {
     destination: './storage/' + folder, // Directory where files will be stored
     filename: (req, file, callback) => {
       const fileExt = extname(file.originalname);
-      const fileName = `${uuid()}.${fileExt}`;
+      const fileName = `${uuid()}${fileExt}`;
       callback(null, fileName);
     },
   });
