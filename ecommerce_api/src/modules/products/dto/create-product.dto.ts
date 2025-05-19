@@ -1,5 +1,11 @@
 import { Exclude, Expose, Transform } from 'class-transformer';
-import { ArrayMinSize, IsArray, IsIn, IsNotEmpty } from 'class-validator';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+} from 'class-validator';
 import { isUnique } from 'src/common/validation/UniqueConstraint';
 
 @Exclude()
@@ -71,4 +77,9 @@ export default class CreateProductDto {
     message: 'Chuyên mục phải nhất 1',
   })
   category: number[];
+
+  @Expose()
+  @IsOptional()
+  @IsArray({ message: 'Ảnh không hợp lệ' })
+  images: string[];
 }

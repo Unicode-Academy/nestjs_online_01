@@ -17,6 +17,7 @@ import { BrandsModule } from './modules/brands/brands.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ProductsModule } from './modules/products/products.module';
+import { AttributesModule } from './modules/attributes/attributes.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { ProductsModule } from './modules/products/products.module';
     CategoriesModule,
     BrandsModule,
     ProductsModule,
+    AttributesModule,
   ],
   controllers: [AppController],
   providers: [AppService, IsUniqueConstraint],

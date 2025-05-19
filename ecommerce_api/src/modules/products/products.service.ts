@@ -10,6 +10,9 @@ import { Brand } from 'src/entities/brand.entity';
 import { APP } from 'src/constants/app';
 import * as fs from 'fs';
 import { CategoriesService } from '../categories/categories.service';
+import { ProductImageService } from './product-image.service';
+import { ProductAttributeValue } from 'src/entities/product-attribute-value.entity';
+import { ValueService } from '../attributes/value.service';
 
 @Injectable()
 export class ProductsService {
@@ -18,6 +21,10 @@ export class ProductsService {
     private readonly productsRepository: Repository<Product>,
     private readonly brandsService: BrandsService,
     private readonly categoriesService: CategoriesService,
+    private readonly productImagesService: ProductImageService,
+    @InjectRepository(ProductAttributeValue)
+    private readonly productAttributeValueRepository: Repository<ProductAttributeValue>,
+    private readonly attributeValuesService: ValueService,
   ) {}
 
   async findAll(query: any) {
@@ -95,7 +102,7 @@ export class ProductsService {
     return data;
   }
   async create(productData: CreateProductDto) {
-    const { brand_id, category, ...dataCreate }: any = {
+    const { brand_id, category, images, ...dataCreate }: any = {
       ...productData,
     };
 
@@ -121,7 +128,23 @@ export class ProductsService {
     );
     dataCreate.categories = categories;
 
+    //Cập nhật bảng products
     const data = await this.productsRepository.save(dataCreate);
+
+    //Lấy thông tin product để lưu vào bảng product_images
+    if (images) {
+      const product = await this.find(data.id);
+      const imageFilter = images.filter(
+        (item: string) => typeof item === 'string',
+      );
+      await Promise.all(
+        imageFilter.map((item: string) => {
+          return this.productImagesService.create({ image: item, product });
+        }),
+      );
+      data.images = imageFilter;
+    }
+
     if (data.thumbnail) {
       data.thumbnail = `${process.env.APP_URL}/${data.thumbnail}`;
     }
@@ -129,13 +152,17 @@ export class ProductsService {
   }
 
   async update(productData: any, id: number) {
-    const { brand_id, ...dataUpdate }: any = {
-      ...productData,
-    };
+    const { brand_id, category, images, attribute_values, ...dataUpdate }: any =
+      {
+        ...productData,
+      };
 
     const relations: {
       brand?: boolean;
+      categories?: boolean;
+      images?: boolean;
     } = {};
+
     if (brand_id) {
       const brand = await this.brandsService.find(brand_id);
       dataUpdate.brand = brand;
@@ -143,7 +170,59 @@ export class ProductsService {
     }
 
     await this.productsRepository.update(id, dataUpdate);
-    return this.find(id, relations);
+
+    relations.images = true;
+
+    const product = await this.find(id, relations);
+
+    if (category) {
+      const categories = await Promise.all(
+        category.map((categoryId: number) => {
+          return this.categoriesService.find(categoryId);
+        }),
+      );
+      product.categories = categories;
+      await this.productsRepository.save(product);
+    }
+
+    if (images) {
+      const imageFilter = images.filter(
+        (item: string) => typeof item === 'string',
+      );
+      await Promise.all(
+        product.images.map((item: any) => {
+          return this.productImagesService.delete(item.id);
+        }),
+      );
+      await Promise.all(
+        imageFilter.map((item: string) => {
+          return this.productImagesService.create({
+            image: item,
+            product,
+          });
+        }),
+      );
+      product.images = imageFilter;
+    }
+
+    if (attribute_values) {
+      await Promise.all(
+        attribute_values.map(async (valueId: number) => {
+          const value = await this.attributeValuesService.find(valueId, {
+            attribute: true,
+          });
+          const attribute = value.attribute;
+
+          return this.productAttributeValueRepository.save({
+            product,
+            attribute,
+            attributeValue: value,
+          });
+        }),
+      );
+    }
+
+    return product;
   }
 
   public async findBySlug(slug: string, id: number = 0) {
@@ -170,12 +249,25 @@ export class ProductsService {
       where: {
         id,
       },
+      relations: {
+        images: true,
+      },
     });
 
     if (!product) {
       return false;
     }
 
+    //Xóa dữ liệu bảng product_images
+    if (product.images) {
+      await Promise.all(
+        product.images.map((item: any) => {
+          return this.productImagesService.delete(item.id);
+        }),
+      );
+    }
+
+    //Xóa dữ liệu bảng products
     await this.productsRepository.delete(id);
 
     if (

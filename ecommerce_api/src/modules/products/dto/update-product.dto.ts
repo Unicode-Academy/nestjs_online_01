@@ -1,5 +1,5 @@
 import { Exclude, Expose, Transform } from 'class-transformer';
-import { IsIn, IsOptional } from 'class-validator';
+import { ArrayMinSize, IsArray, IsIn, IsOptional } from 'class-validator';
 
 @Exclude()
 export default class UpdateProductDto {
@@ -46,4 +46,19 @@ export default class UpdateProductDto {
 
   @Expose()
   brand_id: number;
+
+  @Expose()
+  @IsOptional()
+  @IsArray({ message: 'Chuyên mục không hợp lệ' })
+  category: number[];
+
+  @Expose()
+  @IsOptional()
+  @IsArray({ message: 'Ảnh không hợp lệ' })
+  images: string[];
+
+  @Expose()
+  @IsOptional()
+  @IsArray({ message: 'Giá trị thuộc tính không hợp lệ' })
+  attribute_values: number[];
 }

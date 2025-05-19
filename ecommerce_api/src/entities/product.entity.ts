@@ -6,9 +6,12 @@ import {
   JoinColumn,
   ManyToMany,
   JoinTable,
+  OneToMany,
 } from 'typeorm';
 import { Brand } from './brand.entity';
 import { Category } from './category.entity';
+import { ProductImage } from './product-image.entity';
+import { ProductAttributeValue } from './product-attribute-value.entity';
 
 @Entity('products')
 //PascalCase
@@ -65,6 +68,12 @@ export class Product {
     },
   })
   categories: Category[];
+
+  @OneToMany(() => ProductImage, (image) => image.product)
+  images: ProductImage[];
+
+  @OneToMany(() => ProductAttributeValue, (value) => value.product)
+  attributeValues: ProductAttributeValue[];
 
   @Column({
     type: 'timestamp',
