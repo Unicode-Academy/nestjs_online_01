@@ -12,6 +12,8 @@ import { Brand } from './brand.entity';
 import { Category } from './category.entity';
 import { ProductImage } from './product-image.entity';
 import { ProductAttributeValue } from './product-attribute-value.entity';
+import { Variant } from './variant.entity';
+import { VariantImage } from './variant_image.entity';
 
 @Entity('products')
 //PascalCase
@@ -55,6 +57,9 @@ export class Product {
   @JoinColumn({ name: 'brand_id' })
   brand: Brand;
 
+  @OneToMany(() => VariantImage, (variantImage) => variantImage.product)
+  variantImages: VariantImage[];
+
   @ManyToMany(() => Category, (category) => category.products)
   @JoinTable({
     name: 'products_categories',
@@ -74,6 +79,9 @@ export class Product {
 
   @OneToMany(() => ProductAttributeValue, (value) => value.product)
   attributeValues: ProductAttributeValue[];
+
+  @OneToMany(() => Variant, (variant) => variant.product)
+  variants: Variant[];
 
   @Column({
     type: 'timestamp',

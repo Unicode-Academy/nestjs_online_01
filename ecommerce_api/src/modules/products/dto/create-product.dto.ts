@@ -82,4 +82,14 @@ export default class CreateProductDto {
   @IsOptional()
   @IsArray({ message: 'Ảnh không hợp lệ' })
   images: string[];
+
+  @Expose()
+  @IsOptional()
+  @IsArray({ message: 'Giá trị thuộc tính không hợp lệ' })
+  attribute_values: number[];
+
+  @Expose()
+  @IsOptional()
+  @IsArray({ message: 'Biến thể không hợp lệ' })
+  variants: any[];
 }

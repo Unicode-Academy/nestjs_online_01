@@ -10,12 +10,20 @@ import { ProductImageService } from './product-image.service';
 import { ProductImage } from 'src/entities/product-image.entity';
 import { ProductAttributeValue } from 'src/entities/product-attribute-value.entity';
 import { AttributesModule } from '../attributes/attributes.module';
+import { Variant } from 'src/entities/variant.entity';
+import { VariantAttributeValue } from 'src/entities/variant_attribute_value.entity';
 
 @Module({
   controllers: [ProductsController, AdminProductsController],
   providers: [ProductsService, ProductImageService],
   imports: [
-    TypeOrmModule.forFeature([Product, ProductImage, ProductAttributeValue]),
+    TypeOrmModule.forFeature([
+      Product,
+      ProductImage,
+      ProductAttributeValue,
+      Variant,
+      VariantAttributeValue,
+    ]),
     BrandsModule,
     CategoriesModule,
     AttributesModule,

@@ -13,6 +13,8 @@ import { CategoriesService } from '../categories/categories.service';
 import { ProductImageService } from './product-image.service';
 import { ProductAttributeValue } from 'src/entities/product-attribute-value.entity';
 import { ValueService } from '../attributes/value.service';
+import { Variant } from 'src/entities/variant.entity';
+import { VariantAttributeValue } from 'src/entities/variant_attribute_value.entity';
 
 @Injectable()
 export class ProductsService {
@@ -25,6 +27,10 @@ export class ProductsService {
     @InjectRepository(ProductAttributeValue)
     private readonly productAttributeValueRepository: Repository<ProductAttributeValue>,
     private readonly attributeValuesService: ValueService,
+    @InjectRepository(Variant)
+    private readonly variantRepository: Repository<Variant>,
+    @InjectRepository(VariantAttributeValue)
+    private readonly variantAttributeValueRepository: Repository<VariantAttributeValue>,
   ) {}
 
   async findAll(query: any) {
@@ -102,7 +108,14 @@ export class ProductsService {
     return data;
   }
   async create(productData: CreateProductDto) {
-    const { brand_id, category, images, ...dataCreate }: any = {
+    const {
+      brand_id,
+      category,
+      images,
+      attribute_values,
+      variants,
+      ...dataCreate
+    }: any = {
       ...productData,
     };
 
@@ -143,6 +156,38 @@ export class ProductsService {
         }),
       );
       data.images = imageFilter;
+    }
+
+    //Cập nhật thuộc tính
+    if (attribute_values.length) {
+      await Promise.all(
+        attribute_values.map(async (valueId: number) => {
+          const value = await this.attributeValuesService.find(valueId, {
+            attribute: true,
+          });
+          const attribute = value.attribute;
+
+          return this.productAttributeValueRepository.save({
+            product: data,
+            attribute,
+            attributeValue: value,
+          });
+        }),
+      );
+    }
+
+    //Cập nhật biến thể
+    if (variants.length) {
+      //Thêm vào bảng variants
+      await Promise.all(
+        variants.map(async (variant: any) => {
+          const variantData = {
+            ...variant,
+            product: data,
+          };
+          return this.variantRepository.save(variantData);
+        }),
+      );
     }
 
     if (data.thumbnail) {
@@ -204,8 +249,7 @@ export class ProductsService {
       );
       product.images = imageFilter;
     }
-
-    if (attribute_values) {
+    if (attribute_values.length) {
       await Promise.all(
         attribute_values.map(async (valueId: number) => {
           const value = await this.attributeValuesService.find(valueId, {
@@ -220,6 +264,10 @@ export class ProductsService {
           });
         }),
       );
+    } else {
+      await this.productAttributeValueRepository.delete({
+        product,
+      });
     }
 
     return product;

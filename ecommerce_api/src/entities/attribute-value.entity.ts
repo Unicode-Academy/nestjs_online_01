@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Attribute } from './attribute.entity';
 import { ProductAttributeValue } from './product-attribute-value.entity';
+import { VariantAttributeValue } from './variant_attribute_value.entity';
 
 @Entity('attribute_values')
 //PascalCase
@@ -27,6 +28,9 @@ export class AttributeValue {
 
   @OneToMany(() => ProductAttributeValue, (item) => item.attributeValue)
   productAttributeValues: AttributeValue[];
+
+  @OneToMany(() => VariantAttributeValue, (item) => item.attributeValue)
+  variantAttributeValues: VariantAttributeValue[];
 
   @Column({
     type: 'timestamp',
