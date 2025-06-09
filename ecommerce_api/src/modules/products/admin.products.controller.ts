@@ -4,12 +4,14 @@ import {
   Controller,
   Delete,
   Get,
+  InternalServerErrorException,
   NotFoundException,
   Param,
   Post,
   Put,
   Query,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { VERSION } from 'src/constants/version';
@@ -20,11 +22,14 @@ import UpdateProductDto from './dto/update-product.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { getStorage, multerConfig } from 'src/config/multer';
 import { APP } from 'src/constants/app';
+import { AuthGuard } from 'src/common/guards/auth/auth.guard';
+import { AdminAuthGuard } from 'src/common/guards/auth/admin.auth.guard';
 
 @Controller({
   path: 'admin/products',
   version: VERSION.V1,
 })
+@UseGuards(AuthGuard, AdminAuthGuard)
 export class AdminProductsController {
   constructor(private readonly productsService: ProductsService) {}
   @Get()
@@ -75,6 +80,15 @@ export class AdminProductsController {
       throw new NotFoundException('Product is not exist');
     }
     return successResponse(product, 'Product deleted successfully');
+  }
+
+  @Delete()
+  async deleteAny(@Body('ids') ids: number[]) {
+    const data = await this.productsService.deleteAny(ids);
+    if (data.affected) {
+      return successResponse(data, 'Product deleted successfully');
+    }
+    throw new InternalServerErrorException('Delete failed');
   }
 
   @Post('upload')

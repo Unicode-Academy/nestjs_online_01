@@ -61,4 +61,9 @@ export default class UpdateProductDto {
   @IsOptional()
   @IsArray({ message: 'Giá trị thuộc tính không hợp lệ' })
   attribute_values: number[];
+
+  @Expose()
+  @IsOptional()
+  @IsArray({ message: 'Biến thể không hợp lệ' })
+  variants: any[];
 }

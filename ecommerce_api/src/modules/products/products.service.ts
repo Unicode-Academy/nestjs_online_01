@@ -15,6 +15,7 @@ import { ProductAttributeValue } from 'src/entities/product-attribute-value.enti
 import { ValueService } from '../attributes/value.service';
 import { Variant } from 'src/entities/variant.entity';
 import { VariantAttributeValue } from 'src/entities/variant_attribute_value.entity';
+import { VariantImage } from 'src/entities/variant_image.entity';
 
 @Injectable()
 export class ProductsService {
@@ -29,6 +30,8 @@ export class ProductsService {
     private readonly attributeValuesService: ValueService,
     @InjectRepository(Variant)
     private readonly variantRepository: Repository<Variant>,
+    @InjectRepository(VariantImage)
+    private readonly variantImageRepository: Repository<VariantImage>,
     @InjectRepository(VariantAttributeValue)
     private readonly variantAttributeValueRepository: Repository<VariantAttributeValue>,
   ) {}
@@ -82,18 +85,31 @@ export class ProductsService {
       count,
     ];
   }
-  async findOne(id: number, include: string) {
-    const relations = {};
+  async findOne(id: number, include: string, isClient: boolean = false) {
+    const relations: any = {};
     if (include) {
       const includes = include.split(',');
       includes.forEach((item) => {
         relations[item] = true;
       });
     }
-    return this.find(id, relations);
+
+    //Xử lý variants relations
+    if (relations.variants) {
+      relations.variants = {
+        variantImages: true,
+        variantAttributeValues: {
+          attributeValue: {
+            attribute: true,
+          },
+        },
+      };
+    }
+
+    return this.find(id, relations, isClient);
   }
-  async find(id: number, relations = {}) {
-    const data = await this.productsRepository.findOne({
+  async find(id: number, relations = {}, isClient: boolean = false) {
+    const data: any = await this.productsRepository.findOne({
       where: {
         id,
       },
@@ -102,9 +118,58 @@ export class ProductsService {
     if (!data) {
       return;
     }
+
     if (data.thumbnail) {
       data.thumbnail = `${process.env.APP_URL}/${data.thumbnail}`;
     }
+
+    //Xử lý biến thể
+    if (data.variants && isClient) {
+      const attributes = {};
+
+      const findAttributeValue = (values: any[], attributeValue: any) => {
+        return values.find((item) => {
+          return item.value === attributeValue.value;
+        });
+      };
+      data.variants.forEach((variant) => {
+        if (variant.variantAttributeValues) {
+          variant.variantAttributeValues.forEach(
+            (variantAttributeValue: any) => {
+              if (variantAttributeValue.attributeValue) {
+                const attributeValue = {
+                  ...variantAttributeValue.attributeValue,
+                };
+
+                if (!attributes[attributeValue.attribute.id]) {
+                  attributes[attributeValue.attribute.id] = {
+                    ...attributeValue.attribute,
+                  };
+                }
+
+                if (!attributes[attributeValue.attribute.id].values) {
+                  attributes[attributeValue.attribute.id].values = [];
+                }
+
+                if (
+                  !findAttributeValue(
+                    attributes[attributeValue.attribute.id].values,
+                    attributeValue,
+                  )
+                ) {
+                  const value = { ...attributeValue };
+                  delete value.attribute;
+                  attributes[attributeValue.attribute.id].values.push(value);
+                }
+              }
+            },
+          );
+        }
+      });
+      const attributeArray = Object.values(attributes);
+      data.variants = attributeArray;
+    }
+
     return data;
   }
   async create(productData: CreateProductDto) {
@@ -159,7 +224,7 @@ export class ProductsService {
     }
 
     //Cập nhật thuộc tính
-    if (attribute_values.length) {
+    if (attribute_values?.length) {
       await Promise.all(
         attribute_values.map(async (valueId: number) => {
           const value = await this.attributeValuesService.find(valueId, {
@@ -177,17 +242,42 @@ export class ProductsService {
     }
 
     //Cập nhật biến thể
-    if (variants.length) {
+    if (variants?.length) {
       //Thêm vào bảng variants
-      await Promise.all(
-        variants.map(async (variant: any) => {
-          const variantData = {
-            ...variant,
-            product: data,
-          };
-          return this.variantRepository.save(variantData);
-        }),
-      );
+      variants.forEach(async (variant: any) => {
+        const variantData = {
+          ...variant,
+          product: data,
+        };
+        const variantInstance = await this.variantRepository.save(variantData);
+        if (variantInstance) {
+          //Thêm vào bảng variant_images
+          if (variant.images) {
+            for await (let image of variant.images) {
+              const variantImageData = {
+                image,
+                variant: variantInstance,
+                product: data,
+              };
+              await this.variantImageRepository.save(variantImageData);
+            }
+          }
+          //Thêm vào bảng variant_attribute_values
+          if (variant.attribute_values) {
+            for await (let attributeValueId of variant.attribute_values) {
+              const attributeValue =
+                await this.attributeValuesService.find(attributeValueId);
+              const variantAttributeValueData = {
+                variant: variantInstance,
+                attributeValue: attributeValue,
+              };
+              await this.variantAttributeValueRepository.save(
+                variantAttributeValueData,
+              );
+            }
+          }
+        }
+      });
     }
 
     if (data.thumbnail) {
@@ -197,10 +287,16 @@ export class ProductsService {
   }
 
   async update(productData: any, id: number) {
-    const { brand_id, category, images, attribute_values, ...dataUpdate }: any =
-      {
-        ...productData,
-      };
+    const {
+      brand_id,
+      category,
+      images,
+      attribute_values,
+      variants,
+      ...dataUpdate
+    }: any = {
+      ...productData,
+    };
 
     const relations: {
       brand?: boolean;
@@ -249,7 +345,13 @@ export class ProductsService {
       );
       product.images = imageFilter;
     }
-    if (attribute_values.length) {
+    //Cập nhật thuộc tính
+    if (attribute_values?.length) {
+      //Xóa tất cả giá trị thuộc tính của sản phẩm
+      await this.productAttributeValueRepository.delete({
+        product,
+      });
+      //Thêm mới giá trị thuộc tính
       await Promise.all(
         attribute_values.map(async (valueId: number) => {
           const value = await this.attributeValuesService.find(valueId, {
@@ -264,9 +366,53 @@ export class ProductsService {
           });
         }),
       );
-    } else {
-      await this.productAttributeValueRepository.delete({
-        product,
+    }
+
+    //Cập nhật biến thể
+    if (variants?.length) {
+      //Xóa variants
+      await this.variantRepository.delete({ product });
+      //Thêm vào bảng variants
+      variants.forEach(async (variant: any) => {
+        const variantData = {
+          ...variant,
+          product,
+        };
+        const variantInstance = await this.variantRepository.save(variantData);
+        if (variantInstance) {
+          //Thêm vào bảng variant_images
+          if (variant.images) {
+            //Xóa các images theo variants
+            await this.variantImageRepository.delete({
+              variant: variantInstance,
+            });
+            for await (let image of variant.images) {
+              const variantImageData = {
+                image,
+                variant: variantInstance,
+                product,
+              };
+              await this.variantImageRepository.save(variantImageData);
+            }
+          }
+          //Thêm vào bảng variant_attribute_values
+          if (variant.attribute_values) {
+            await this.variantAttributeValueRepository.delete({
+              variant: variantInstance,
+            });
+            for await (let attributeValueId of variant.attribute_values) {
+              const attributeValue =
+                await this.attributeValuesService.find(attributeValueId);
+              const variantAttributeValueData = {
+                variant: variantInstance,
+                attributeValue: attributeValue,
+              };
+              await this.variantAttributeValueRepository.save(
+                variantAttributeValueData,
+              );
+            }
+          }
+        }
       });
     }
 
@@ -306,15 +452,6 @@ export class ProductsService {
       return false;
     }
 
-    //Xóa dữ liệu bảng product_images
-    if (product.images) {
-      await Promise.all(
-        product.images.map((item: any) => {
-          return this.productImagesService.delete(item.id);
-        }),
-      );
-    }
-
     //Xóa dữ liệu bảng products
     await this.productsRepository.delete(id);
 
@@ -326,5 +463,9 @@ export class ProductsService {
     }
 
     return product;
+  }
+
+  deleteAny(ids: number[]) {
+    return this.productsRepository.delete(ids);
   }
 }

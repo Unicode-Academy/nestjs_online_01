@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { VERSION } from 'src/constants/version';
 import { ValueService } from './value.service';
@@ -14,11 +15,14 @@ import CreateValueDto from './dto/create-value.dto';
 import { AttributesService } from './attributes.service';
 import { successResponse } from 'src/utils/response';
 import UpdateValueDto from './dto/update-value.dto';
+import { AdminAuthGuard } from 'src/common/guards/auth/admin.auth.guard';
+import { AuthGuard } from 'src/common/guards/auth/auth.guard';
 
 @Controller({
   path: 'admin/attributes',
   version: VERSION.V1,
 })
+@UseGuards(AuthGuard, AdminAuthGuard)
 export class AdminValueController {
   constructor(
     private readonly valueService: ValueService,
